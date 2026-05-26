@@ -67,7 +67,8 @@ app.get("/api/session", async (_req, res) => {
       body: JSON.stringify({
   session: {
     type: "realtime",
-    model: "gpt-4o-realtime-preview",
+    model: "gpt-realtime",
+    voice: "shimmer",
     instructions: "Tu es un jury de VAE aide-soignant. Tu parles exclusivement en français.",
   },
 }),
