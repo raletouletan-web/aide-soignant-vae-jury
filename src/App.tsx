@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
-// ──────────────────────────────────────────────────────────────────
-// Types
-// ──────────────────────────────────────────────────────────────────
 type Message = {
   id: string;
   role: "user" | "assistant";
@@ -12,15 +9,10 @@ type Message = {
 type ConnectionStatus = "idle" | "connecting" | "connected" | "error";
 type InterviewMode = null | "apprentissage" | "simulation";
 
-// ──────────────────────────────────────────────────────────────────
-// Constantes GA
-// ──────────────────────────────────────────────────────────────────
-const WEBRTC_URL = "https://api.openai.com/v1/realtime";
-const MODEL      = "gpt-realtime-preview";
+// ✅ Constantes GA corrigées
+const WEBRTC_URL = "https://api.openai.com/v1/realtime/calls";
+const MODEL      = "gpt-realtime";
 
-// ──────────────────────────────────────────────────────────────────
-// PROMPT — Jury VAE Aide-Soignant — Conçu par Patrice DIAKITÉ
-// ──────────────────────────────────────────────────────────────────
 const INSTRUCTIONS = `LANGUE : Tu DOIS parler UNIQUEMENT en français. Toutes tes réponses, questions et commentaires sont exclusivement en français. Ne parle jamais en anglais ni dans aucune autre langue.
 
 Tu fonctionnes en temps réel (speech-to-speech). Tu adoptes la posture d'un membre de jury professionnel, bienveillant mais exigeant. Phrases courtes. Une seule question à la fois.
@@ -41,29 +33,29 @@ Tu utilises des phrases courtes pour une meilleure compréhension orale.
 Tu évalues le candidat sur les 5 domaines d'activités (DA) et les 11 compétences officielles du DEAS :
 
 5 DOMAINES D'ACTIVITÉS :
-DA1 : Accompagnement et soins de la personne dans les activités de sa vie quotidienne et de sa vie sociale en repérant les fragilités. Aide aux actes essentiels, respect du projet de vie, évaluation de l'autonomie, identification des risques de maltraitance ou de vulnérabilité.
-DA2 : Appréciation de l'état clinique de la personne et mise en œuvre de soins adaptés en collaboration avec l'infirmier en intégrant la qualité et la prévention des risques. Observation de l'état général, mesure des paramètres vitaux, évaluation de la douleur, réalisation de soins personnalisés.
-DA3 : Information et accompagnement des personnes et de leur entourage, des professionnels et des apprenants. Accueil, communication avec le patient et ses proches, encadrement et formation des pairs et stagiaires.
-DA4 : Entretien de l'environnement immédiat de la personne et des matériels liés aux activités de soins. Nettoyage, désinfection, gestion des stocks, repérage des anomalies ou dysfonctionnements du matériel.
-DA5 : Transmission des observations recueillies pour maintenir la continuité des soins et des activités. Traçabilité des soins, hiérarchisation des informations, organisation du travail au sein d'une équipe pluriprofessionnelle.
+DA1 : Accompagnement et soins de la personne dans les activités de sa vie quotidienne et de sa vie sociale en repérant les fragilités.
+DA2 : Appréciation de l'état clinique de la personne et mise en œuvre de soins adaptés en collaboration avec l'infirmier.
+DA3 : Information et accompagnement des personnes et de leur entourage, des professionnels et des apprenants.
+DA4 : Entretien de l'environnement immédiat de la personne et des matériels liés aux activités de soins.
+DA5 : Transmission des observations recueillies pour maintenir la continuité des soins et des activités.
 
 11 COMPÉTENCES ESSENTIELLES :
 Bloc 1 :
-- Compétence 1 : Accompagner les personnes dans les actes essentiels de la vie quotidienne et sociale, personnaliser cet accompagnement et réajuster si nécessaire.
-- Compétence 2 : Identifier les situations à risque lors de l'accompagnement, mettre en œuvre des actions de prévention adéquates et les évaluer.
+- Compétence 1 : Accompagner les personnes dans les actes essentiels de la vie quotidienne et sociale.
+- Compétence 2 : Identifier les situations à risque, mettre en œuvre des actions de prévention adéquates.
 Bloc 2 :
-- Compétence 3 : Évaluer l'état clinique d'une personne à tout âge de la vie pour adapter sa prise en soins.
+- Compétence 3 : Évaluer l'état clinique d'une personne à tout âge de la vie.
 - Compétence 4 : Mettre en œuvre des soins adaptés à l'état clinique de la personne.
-- Compétence 5 : Accompagner la personne dans son installation et ses déplacements en mobilisant ses ressources et en utilisant des techniques préventives de mobilisation.
+- Compétence 5 : Accompagner la personne dans son installation et ses déplacements.
 Bloc 3 :
 - Compétence 6 : Établir une communication adaptée pour informer et accompagner la personne et son entourage.
 - Compétence 7 : Informer et former les pairs, les personnes en formation et les autres professionnels.
 Bloc 4 :
-- Compétence 8 : Utiliser des techniques d'entretien des locaux et du matériel adaptées en prenant en compte la prévention des risques associés.
-- Compétence 9 : Repérer et traiter les anomalies et dysfonctionnements en lien avec l'entretien des locaux et des matériels.
+- Compétence 8 : Utiliser des techniques d'entretien des locaux et du matériel adaptées.
+- Compétence 9 : Repérer et traiter les anomalies et dysfonctionnements en lien avec l'entretien.
 Bloc 5 :
-- Compétence 10 : Rechercher, traiter et transmettre les données pertinentes pour assurer la continuité et la traçabilité des soins et des activités.
-- Compétence 11 : Organiser son activité, coopérer au sein d'une équipe pluriprofessionnelle et améliorer sa pratique dans le cadre d'une démarche qualité/gestion des risques.
+- Compétence 10 : Rechercher, traiter et transmettre les données pertinentes pour assurer la continuité des soins.
+- Compétence 11 : Organiser son activité, coopérer au sein d'une équipe pluriprofessionnelle.
 
 3. OUVERTURE OBLIGATOIRE
 Prononce exactement ce texte, sans aucune modification, dès le début :
@@ -77,68 +69,41 @@ Mode simulation : je me comporte exactement comme un véritable jury.
 Veuillez choisir votre mode. Dites : MODE APPRENTISSAGE ou MODE SIMULATION. »
 
 GESTION DU SILENCE OU DE L'HÉSITATION :
-Si le candidat ne répond pas, hésite longuement, dit « je ne sais pas » ou formule autrement (ex. : « simulation », « je veux le mode simulation ») → tu passes automatiquement en MODE SIMULATION.
+Si le candidat ne répond pas, hésite longuement ou formule autrement → tu passes automatiquement en MODE SIMULATION.
 
 La première question après le choix du mode est toujours : "Pouvez-vous vous présenter brièvement ?"
-Tu utiliseras le prénom du candidat pour personnaliser tes questions lorsque c'est nécessaire.
 
 4. FONCTIONNEMENT PAR MODE
 
 MODE APPRENTISSAGE
-Structure : 10 questions couvrant les 5 domaines. Questions variées, ordre non défini. Durée maximale : 20 minutes.
-À chaque réponse :
-- Réponse complète et précise → validation brève + question suivante.
-- Réponse insuffisante, floue ou incomplète → tu expliques poliment ce qui manque + tu poses une seule question d'aide (ex. : « Pouvez-vous décrire la procédure étape par étape ? »). Quelle que soit la réponse à cette aide → tu passes à la question suivante.
-- Réponse hors sujet ou incohérente → « Votre réponse ne correspond pas à la question posée. » + tu reformules la question une fois.
-Règle clé : tu accompagnes sans donner la solution. Maximum 2 aides par question.
+Structure : 10 questions couvrant les 5 domaines. Durée maximale : 20 minutes.
+À chaque réponse incomplète → tu expliques ce qui manque + une seule question d'aide.
+Maximum 2 aides par question.
 
 MODE SIMULATION
 Structure : 10 questions couvrant les 5 domaines. Durée maximale : 20 minutes.
-À chaque réponse :
-- Tu ne valides pas. Tu ne corriges pas. Tu ne donnes aucune aide.
-- Tu peux rebondir pour creuser (ex. : « Décrivez précisément les gestes réalisés, étape par étape. »).
-- Réponse hors sujet ou incohérente → « Votre réponse ne correspond pas à la question posée. » + tu précises la question.
+Tu ne valides pas. Tu ne corriges pas. Tu ne donnes aucune aide.
 Tu notes en continu pour la synthèse finale.
 
-RÈGLES COMMUNES AUX DEUX MODES :
-- Si le candidat souhaite changer de mode en cours d'entretien → ce n'est pas possible, tu le lui indiques poliment.
-- Si le candidat souhaite arrêter ou stopper la session → tu conclus formellement et tu termines.
-- Si le candidat reste sans réponse longuement → tu précises que tu vas stopper la session, puis tu termines.
+5. SYNTHÈSE FINALE
+Structure (maximum 500 mots) :
+1. Impression générale.
 
-5. ANALYSE EN CONTINU (les deux modes)
-Durant tout l'entretien, tu évalues silencieusement :
-- Vocabulaire : présence des termes techniques (asepsie, escarre, paramètres vitaux, contention, etc.)
-- Profondeur : procédures expliquées étape par étape, raisonnement clinique présent.
-- Pertinence des exemples : situations réelles, datées, contextualisées, spécifiques au soin.
-- Véracité des gestes : respect des règles d'hygiène, sécurité patient, bonnes postures de mobilisation.
-En mode apprentissage : tu corriges les erreurs graves au fil de l'entretien.
-En mode simulation : tu conserves les erreurs graves pour la synthèse finale uniquement.
+2. Ce que le jury a perçu comme solide.
 
-6. SYNTHÈSE FINALE (les deux modes) — Pas de minuterie pour cette partie
-À la fin des 10 questions (ou si le temps est écoulé), tu produis la synthèse suivante à l'oral, de façon structurée. Le ton est professionnel mais bienveillant, orienté progression et non sanction.
+3. Ce qui mérite d'être renforcé avant le vrai jury.
 
-Structure de la synthèse (maximum 500 mots) :
-1. Impression générale : 2-3 phrases sur la posture du candidat (aisance, clarté, engagement). Commencer par un point positif.
-2. Ce que le jury a perçu comme solide : 2-4 compétences ou comportements bien démontrés, avec un exemple tiré de l'entretien si possible.
-3. Ce qui mérite d'être renforcé avant le vrai jury : 2-3 points concrets, formulés comme des conseils ("Pensez à...", "Il serait utile de...") plutôt que comme des constats d'échec.
-4. Point de vigilance : uniquement si un écart significatif est détecté sur une compétence clé du référentiel. Sinon, ne pas mentionner cette section.
-5. Conseil de préparation : 1 action prioritaire concrète à travailler avant le jury réel (procédure à revoir, exemple à préparer, vocabulaire à maîtriser).
-6. Verdict simulé : l'une des trois options :
+4. Point de vigilance (si écart significatif détecté).
+
+5. Conseil de préparation : 1 action prioritaire concrète.
+
+6. Verdict simulé :
    - "Profil favorable à la validation"
    - "Profil à compléter — quelques ajustements suffisent"
    - "Préparation à poursuivre — des écarts importants subsistent"
-   Accompagner d'une phrase d'explication courte.
-Terminer par une phrase d'encouragement personnalisée avec le prénom du candidat.
 
-CONTRAINTES : Ne pas lister tous les domaines un par un. Pas de tableaux. Maximum 500 mots.
+Terminer par une phrase d'encouragement personnalisée avec le prénom du candidat.`;
 
-7. FIN DE L'ENTRETIEN
-Après la synthèse, tu conclus formellement et tu termines l'entretien.
-Tu restes formel jusqu'au dernier mot.`;
-
-// ──────────────────────────────────────────────────────────────────
-// Utilitaire : décode base64 PCM16 → AudioBuffer
-// ──────────────────────────────────────────────────────────────────
 function pcm16Base64ToAudioBuffer(base64: string, ctx: AudioContext): AudioBuffer | null {
   try {
     const binary = atob(base64);
@@ -153,9 +118,6 @@ function pcm16Base64ToAudioBuffer(base64: string, ctx: AudioContext): AudioBuffe
   } catch { return null; }
 }
 
-// ──────────────────────────────────────────────────────────────────
-// Composant principal
-// ──────────────────────────────────────────────────────────────────
 export default function App() {
   const [status,      setStatus]      = useState<ConnectionStatus>("idle");
   const [isSpeaking,  setIsSpeaking]  = useState(false);
@@ -166,16 +128,12 @@ export default function App() {
   const [mode,        setMode]        = useState<InterviewMode>(null);
   const [questionNum, setQuestionNum] = useState(0);
 
-  // ── Inactivité ──
-  // 90 s sans parole détectée → bandeau d'alerte
-  // puis 15 s sans réaction → déconnexion automatique
-  const INACTIVITY_THRESHOLD = 90; // secondes avant alerte
-  const COUNTDOWN_DURATION   = 15; // secondes du compte à rebours
+  const INACTIVITY_THRESHOLD = 90;
+  const COUNTDOWN_DURATION   = 15;
   const [inactivitySec,  setInactivitySec]  = useState(0);
   const [showInactivity, setShowInactivity] = useState(false);
   const [countdown,      setCountdown]      = useState(COUNTDOWN_DURATION);
 
-  // WebRTC refs
   const pcRef          = useRef<RTCPeerConnection | null>(null);
   const dcRef          = useRef<RTCDataChannel | null>(null);
   const micStreamRef   = useRef<MediaStream | null>(null);
@@ -189,13 +147,9 @@ export default function App() {
   const isConnected  = status === "connected";
   const isConnecting = status === "connecting";
 
-  // ── Timer (max 20 min = 1200 s) ──
   useEffect(() => {
     if (isConnected) {
-      timerRef.current = window.setInterval(
-        () => setSeconds((s) => s + 1),
-        1000
-      );
+      timerRef.current = window.setInterval(() => setSeconds((s) => s + 1), 1000);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
       setSeconds(0);
@@ -203,63 +157,38 @@ export default function App() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [isConnected]);
 
-  // ── Détection d'inactivité ──
-  // Compte les secondes sans activité (parole jury ou utilisateur).
-  // À chaque tick : +1s ; reset à 0 dès qu'une activité est détectée.
   useEffect(() => {
     if (!isConnected) {
-      setInactivitySec(0);
-      setShowInactivity(false);
-      setCountdown(COUNTDOWN_DURATION);
+      setInactivitySec(0); setShowInactivity(false); setCountdown(COUNTDOWN_DURATION);
       return;
     }
-    const id = window.setInterval(() => {
-      setInactivitySec((s) => s + 1);
-    }, 1000);
+    const id = window.setInterval(() => setInactivitySec((s) => s + 1), 1000);
     return () => clearInterval(id);
   }, [isConnected]);
 
-  // ── Reset automatique du compteur d'inactivité dès activité ──
   useEffect(() => {
     if (isSpeaking || isListening) {
-      setInactivitySec(0);
-      setShowInactivity(false);
-      setCountdown(COUNTDOWN_DURATION);
+      setInactivitySec(0); setShowInactivity(false); setCountdown(COUNTDOWN_DURATION);
     }
   }, [isSpeaking, isListening]);
 
-  // ── Déclenchement bandeau + déconnexion auto ──
   useEffect(() => {
     if (!isConnected) return;
-
-    // Seuil atteint : on ouvre le bandeau si pas déjà ouvert
     if (inactivitySec >= INACTIVITY_THRESHOLD && !showInactivity) {
-      setShowInactivity(true);
-      setCountdown(COUNTDOWN_DURATION);
-      return;
+      setShowInactivity(true); setCountdown(COUNTDOWN_DURATION); return;
     }
-
-    // Bandeau ouvert : on décrémente le compte à rebours
     if (showInactivity) {
-      if (countdown <= 0) {
-        // Fin du compte à rebours → déconnexion automatique
-        stopInterview();
-        return;
-      }
+      if (countdown <= 0) { stopInterview(); return; }
       const t = window.setTimeout(() => setCountdown((c) => c - 1), 1000);
       return () => clearTimeout(t);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inactivitySec, showInactivity, countdown, isConnected]);
 
-  // ── Action "Continuer la session" depuis le bandeau ──
   const continueSession = useCallback(() => {
-    setInactivitySec(0);
-    setShowInactivity(false);
-    setCountdown(COUNTDOWN_DURATION);
+    setInactivitySec(0); setShowInactivity(false); setCountdown(COUNTDOWN_DURATION);
   }, []);
 
-  // ── Détecter le mode choisi dans les messages du jury ──
   useEffect(() => {
     const last = messages.filter((m) => m.role === "user").slice(-1)[0];
     if (!last || mode) return;
@@ -268,15 +197,11 @@ export default function App() {
     else if (t.includes("simulation")) setMode("simulation");
   }, [messages, mode]);
 
-  // ── Compter les questions du jury ──
   useEffect(() => {
-    const juryMsgs = messages.filter(
-      (m) => m.role === "assistant" && m.text.includes("?")
-    );
+    const juryMsgs = messages.filter((m) => m.role === "assistant" && m.text.includes("?"));
     setQuestionNum(Math.min(juryMsgs.length, 10));
   }, [messages]);
 
-  // ── Auto-scroll transcript ──
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -288,19 +213,13 @@ export default function App() {
   };
 
   const progressPct = Math.min((seconds / 1200) * 100, 100);
-  const timeWarning = seconds >= 1080; // ≥ 18 min
+  const timeWarning = seconds >= 1080;
 
-  // ────────────────────────────────────────────
-  // Lecture audio PCM16 (fallback DataChannel)
-  // ────────────────────────────────────────────
   const playNextChunk = useCallback(() => {
     if (!audioCtxRef.current || audioQueueRef.current.length === 0) {
-      isPlayingRef.current = false;
-      setIsSpeaking(false);
-      return;
+      isPlayingRef.current = false; setIsSpeaking(false); return;
     }
-    isPlayingRef.current = true;
-    setIsSpeaking(true);
+    isPlayingRef.current = true; setIsSpeaking(true);
     const buf    = audioQueueRef.current.shift()!;
     const source = audioCtxRef.current.createBufferSource();
     source.buffer = buf;
@@ -317,175 +236,114 @@ export default function App() {
     if (!isPlayingRef.current) playNextChunk();
   }, [playNextChunk]);
 
-  // ────────────────────────────────────────────
-  // Envoi d'un event Realtime via DataChannel
-  // ────────────────────────────────────────────
   const sendEvent = useCallback((event: object) => {
-    if (dcRef.current?.readyState === "open") {
-      dcRef.current.send(JSON.stringify(event));
-    }
+    if (dcRef.current?.readyState === "open") dcRef.current.send(JSON.stringify(event));
   }, []);
 
-  // ────────────────────────────────────────────
-  // Upsert transcript
-  // ────────────────────────────────────────────
-  const upsertMessage = useCallback(
-    (id: string, role: "user" | "assistant", text: string) => {
-      setMessages((prev) => {
-        const idx = prev.findIndex((m) => m.id === id);
-        if (idx >= 0) {
-          const next = [...prev];
-          next[idx] = { ...next[idx], text };
-          return next;
-        }
-        return [...prev, { id, role, text }];
-      });
-    },
-    []
-  );
+  const upsertMessage = useCallback((id: string, role: "user" | "assistant", text: string) => {
+    setMessages((prev) => {
+      const idx = prev.findIndex((m) => m.id === id);
+      if (idx >= 0) { const next = [...prev]; next[idx] = { ...next[idx], text }; return next; }
+      return [...prev, { id, role, text }];
+    });
+  }, []);
 
-  // ────────────────────────────────────────────
-  // Gestion des server events (DataChannel)
-  // ────────────────────────────────────────────
-  const handleServerEvent = useCallback(
-    (raw: string) => {
-      let event: any;
-      try { event = JSON.parse(raw); } catch { return; }
+  const handleServerEvent = useCallback((raw: string) => {
+    let event: any;
+    try { event = JSON.parse(raw); } catch { return; }
 
-      switch (event.type) {
+    switch (event.type) {
 
-        case "session.created":
-          // Configurer la session avec les paramètres qui ne passent pas dans /client_secrets
-          sendEvent({
-            type: "session.update",
-            session: {
-              instructions: INSTRUCTIONS,
-              input_audio_transcription: {
-                model:    "whisper-1",
-                language: "fr",
-              },
-              turn_detection: {
-                type:                "server_vad",
-                threshold:           0.5,
-                prefix_padding_ms:   300,
-                silence_duration_ms: 600,
-                create_response:     true,
-              },
-            },
-          });
-          // Déclencher l'ouverture du jury
-          sendEvent({ type: "response.create" });
-          break;
+      // ✅ Instructions déjà définies côté serveur dans /client_secrets
+      case "session.created":
+        sendEvent({ type: "response.create" });
+        break;
 
-        case "response.output_audio.delta":
-          enqueueAudio(event.delta);
-          break;
+      case "response.output_audio.delta":
+        enqueueAudio(event.delta);
+        break;
 
-        case "response.output_audio_transcript.delta": {
-          const id = event.item_id || "assistant";
-          transcriptRef.current[id] =
-            (transcriptRef.current[id] || "") + (event.delta || "");
-          upsertMessage(id, "assistant", transcriptRef.current[id]);
-          break;
-        }
-
-        case "response.output_audio_transcript.done": {
-          const id = event.item_id || "assistant";
-          if (event.transcript) {
-            transcriptRef.current[id] = event.transcript;
-            upsertMessage(id, "assistant", event.transcript);
-          }
-          break;
-        }
-
-        case "conversation.item.input_audio_transcription.delta": {
-          const id = event.item_id || "user";
-          transcriptRef.current[id] =
-            (transcriptRef.current[id] || "") + (event.delta || "");
-          upsertMessage(id, "user", transcriptRef.current[id]);
-          break;
-        }
-
-        case "conversation.item.input_audio_transcription.completed": {
-          const id = event.item_id || "user";
-          transcriptRef.current[id] =
-            event.transcript || transcriptRef.current[id] || "";
-          upsertMessage(id, "user", transcriptRef.current[id]);
-          break;
-        }
-
-        case "input_audio_buffer.speech_started":
-          setIsListening(true);
-          // Barge-in : couper l'audio du jury
-          audioQueueRef.current = [];
-          isPlayingRef.current  = false;
-          setIsSpeaking(false);
-          break;
-
-        case "input_audio_buffer.speech_stopped":
-          setIsListening(false);
-          break;
-
-        case "response.done":
-          setIsSpeaking(false);
-          break;
-
-        case "error":
-          console.error("OpenAI Realtime error:", event.error);
-          setErrorMsg(event.error?.message || "Erreur API inconnue.");
-          break;
-
-        default:
-          break;
+      case "response.output_audio_transcript.delta": {
+        const id = event.item_id || "assistant";
+        transcriptRef.current[id] = (transcriptRef.current[id] || "") + (event.delta || "");
+        upsertMessage(id, "assistant", transcriptRef.current[id]);
+        break;
       }
-    },
-    [sendEvent, enqueueAudio, upsertMessage]
-  );
 
-  // ──────────────────────────────────────────────────────────────────
-  // Connexion WebRTC GA
-  // ──────────────────────────────────────────────────────────────────
+      case "response.output_audio_transcript.done": {
+        const id = event.item_id || "assistant";
+        if (event.transcript) { transcriptRef.current[id] = event.transcript; upsertMessage(id, "assistant", event.transcript); }
+        break;
+      }
+
+      case "conversation.item.input_audio_transcription.delta": {
+        const id = event.item_id || "user";
+        transcriptRef.current[id] = (transcriptRef.current[id] || "") + (event.delta || "");
+        upsertMessage(id, "user", transcriptRef.current[id]);
+        break;
+      }
+
+      case "conversation.item.input_audio_transcription.completed": {
+        const id = event.item_id || "user";
+        transcriptRef.current[id] = event.transcript || transcriptRef.current[id] || "";
+        upsertMessage(id, "user", transcriptRef.current[id]);
+        break;
+      }
+
+      case "input_audio_buffer.speech_started":
+        setIsListening(true);
+        audioQueueRef.current = []; isPlayingRef.current = false; setIsSpeaking(false);
+        break;
+
+      case "input_audio_buffer.speech_stopped":
+        setIsListening(false);
+        break;
+
+      case "response.done":
+        setIsSpeaking(false);
+        break;
+
+      case "error":
+        console.error("OpenAI Realtime error:", event.error);
+        setErrorMsg(event.error?.message || "Erreur API inconnue.");
+        break;
+
+      default: break;
+    }
+  }, [sendEvent, enqueueAudio, upsertMessage]);
+
   const startInterview = async () => {
     setErrorMsg(null);
     try {
       setStatus("connecting");
 
-      // 1. Ephemeral key depuis notre backend (server.js + .env)
       const sessionRes = await fetch("/api/session");
       if (!sessionRes.ok) {
         const body = await sessionRes.json().catch(() => ({}));
-        throw new Error(
-          body.error ||
-          body.detail ||
-          `Erreur serveur ${sessionRes.status} — vérifiez que server.js tourne et que OPENAI_API_KEY est définie dans .env`
-        );
+        throw new Error(body.error || body.detail || `Erreur serveur ${sessionRes.status}`);
       }
-      const sessionData  = await sessionRes.json();
-      const ephemeralKey = sessionData.value;
-if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/session.");
+      const sessionData = await sessionRes.json();
 
-      // 2. Micro
+      // ✅ token directement dans sessionData.value
+      const ephemeralKey = sessionData.value;
+      if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/session.");
+
       const micStream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 24000 },
       });
       micStreamRef.current = micStream;
+      audioCtxRef.current  = new AudioContext({ sampleRate: 24000 });
 
-      // 3. AudioContext fallback PCM
-      audioCtxRef.current = new AudioContext({ sampleRate: 24000 });
-
-      // 4. RTCPeerConnection
       const pc = new RTCPeerConnection();
       pcRef.current = pc;
       micStream.getTracks().forEach((t) => pc.addTrack(t, micStream));
 
-      // 5. DataChannel
       const dc = pc.createDataChannel("oai-events");
       dcRef.current = dc;
       dc.onopen    = () => { console.log("✅ DataChannel ouvert"); setStatus("connected"); };
       dc.onmessage = (e) => handleServerEvent(e.data);
       dc.onerror   = () => setErrorMsg("Erreur de connexion DataChannel.");
 
-      // 6. Audio entrant via WebRTC track
       pc.ontrack = (e) => {
         const el = document.getElementById("jury-audio") as HTMLAudioElement | null;
         if (el && e.streams[0]) { el.srcObject = e.streams[0]; el.play().catch(() => {}); }
@@ -497,11 +355,10 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
         }
       };
 
-      // 7. SDP offer → answer
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      // ✅ règle GA n°11 + n°12
+      // ✅ URL GA correcte + modèle GA
       const sdpRes = await fetch(`${WEBRTC_URL}?model=${MODEL}`, {
         method: "POST",
         headers: { Authorization: `Bearer ${ephemeralKey}`, "Content-Type": "application/sdp" },
@@ -520,12 +377,10 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
   };
 
   const cleanup = () => {
-    dcRef.current?.close();
-    pcRef.current?.close();
+    dcRef.current?.close(); pcRef.current?.close();
     micStreamRef.current?.getTracks().forEach((t) => t.stop());
     audioCtxRef.current?.close().catch(() => {});
-    audioQueueRef.current = [];
-    isPlayingRef.current  = false;
+    audioQueueRef.current = []; isPlayingRef.current = false;
     pcRef.current = dcRef.current = micStreamRef.current = audioCtxRef.current = null;
     transcriptRef.current = {};
     const el = document.getElementById("jury-audio") as HTMLAudioElement | null;
@@ -533,68 +388,29 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
   };
 
   const stopInterview = () => {
-    cleanup();
-    setStatus("idle");
-    setIsSpeaking(false);
-    setIsListening(false);
-    setMessages([]);
-    setMode(null);
-    setQuestionNum(0);
+    cleanup(); setStatus("idle"); setIsSpeaking(false); setIsListening(false);
+    setMessages([]); setMode(null); setQuestionNum(0);
   };
 
   const interruptJury = () => {
-    audioQueueRef.current = [];
-    isPlayingRef.current  = false;
-    setIsSpeaking(false);
+    audioQueueRef.current = []; isPlayingRef.current = false; setIsSpeaking(false);
     sendEvent({ type: "response.cancel" });
   };
 
-  // ──────────────────────────────────────────────────────────────────
-  // Helpers UI
-  // ──────────────────────────────────────────────────────────────────
-  const modeLabel = mode === "apprentissage"
-    ? "Mode Apprentissage"
-    : mode === "simulation"
-    ? "Mode Simulation"
-    : null;
+  const modeLabel = mode === "apprentissage" ? "Mode Apprentissage" : mode === "simulation" ? "Mode Simulation" : null;
+  const modeBadgeColor = mode === "apprentissage" ? "bg-blue-50 border-blue-200 text-blue-700" : mode === "simulation" ? "bg-amber-50 border-amber-200 text-amber-700" : "";
+  const statusLabel = isConnecting ? "Connexion en cours…" : isConnected ? isSpeaking ? "Le jury s'exprime…" : isListening ? "À vous la parole" : mode ? "En attente de votre réponse" : "Choisissez votre mode" : "Prêt pour votre oral ?";
 
-  const modeBadgeColor = mode === "apprentissage"
-    ? "bg-blue-50 border-blue-200 text-blue-700"
-    : mode === "simulation"
-    ? "bg-amber-50 border-amber-200 text-amber-700"
-    : "";
-
-  const statusLabel = isConnecting
-    ? "Connexion en cours…"
-    : isConnected
-    ? isSpeaking
-      ? "Le jury s'exprime…"
-      : isListening
-      ? "À vous la parole"
-      : mode
-      ? "En attente de votre réponse"
-      : "Choisissez votre mode"
-    : "Prêt pour votre oral ?";
-
-  // ──────────────────────────────────────────────────────────────────
-  // Rendu
-  // ──────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#f7f5f1] text-[#2b2e27] flex flex-col">
       <audio id="jury-audio" autoPlay hidden />
 
-      {/* ═══════════════════════════════════════
-          HEADER
-      ═══════════════════════════════════════ */}
       <header className="border-b border-[#e5e1d8] bg-[#fafaf7]/95 backdrop-blur sticky top-0 z-40">
         <div className="mx-auto max-w-[1280px] px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
-
-          {/* Logo + titre */}
           <div className="flex items-center gap-3 min-w-0">
             <div className="h-10 w-10 rounded-lg bg-[#5f6452] flex items-center justify-center shadow-sm flex-shrink-0">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2l7 4v6c0 5-3.5 9.5-7 10-3.5-.5-7-5-7-10V6l7-4z"
-                  stroke="white" strokeWidth="1.6" fill="white" fillOpacity="0.2"/>
+                <path d="M12 2l7 4v6c0 5-3.5 9.5-7 10-3.5-.5-7-5-7-10V6l7-4z" stroke="white" strokeWidth="1.6" fill="white" fillOpacity="0.2"/>
                 <path d="M9 12l2 2 4-4" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
               </svg>
             </div>
@@ -607,89 +423,51 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
               </div>
             </div>
           </div>
-
-          {/* Droite header */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Badge mode actif */}
             {modeLabel && (
               <div className={`hidden sm:flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold ${modeBadgeColor}`}>
                 <span className={`h-1.5 w-1.5 rounded-full ${mode === "apprentissage" ? "bg-blue-500" : "bg-amber-500"}`}/>
                 {modeLabel}
               </div>
             )}
-            {/* Statut connexion */}
             <div className="hidden sm:flex items-center gap-2 rounded-full border border-[#e0dbd0] bg-white/70 px-3 py-1.5 text-xs">
-              <span className={`h-2 w-2 rounded-full transition-colors duration-500 ${
-                isConnected  ? "bg-emerald-500 animate-pulse" :
-                isConnecting ? "bg-amber-400 animate-pulse" :
-                               "bg-[#b5b5a8]"
-              }`}/>
+              <span className={`h-2 w-2 rounded-full transition-colors duration-500 ${isConnected ? "bg-emerald-500 animate-pulse" : isConnecting ? "bg-amber-400 animate-pulse" : "bg-[#b5b5a8]"}`}/>
               <span className="text-[#6b6f5f] uppercase tracking-wide font-medium text-[10px]">
                 {isConnected ? "CONNECTÉ" : isConnecting ? "CONNEXION…" : "DÉCONNECTÉ"}
               </span>
             </div>
-            {/* Badge Patrice */}
             <div className="rounded-full border border-[#e0dbd0] bg-white px-3 py-1.5 text-[10px] sm:text-[11px] font-medium text-[#4a4e42] shadow-sm whitespace-nowrap">
               PATRICE DIAKITÉ
             </div>
           </div>
         </div>
-
-        {/* Barre de progression du temps (visible uniquement en session) */}
         {isConnected && (
           <div className="h-[3px] w-full bg-[#ede9e0]">
-            <div
-              className={`h-full transition-all duration-1000 ${timeWarning ? "bg-amber-400" : "bg-[#5f6452]"}`}
-              style={{ width: `${progressPct}%` }}
-            />
+            <div className={`h-full transition-all duration-1000 ${timeWarning ? "bg-amber-400" : "bg-[#5f6452]"}`} style={{ width: `${progressPct}%` }}/>
           </div>
         )}
       </header>
 
-      {/* ═══════════════════════════════════════
-          GRILLE PRINCIPALE
-      ═══════════════════════════════════════ */}
       <main className="mx-auto max-w-[1280px] w-full px-4 sm:px-6 py-6 sm:py-8 grid grid-cols-1 xl:grid-cols-[1.4fr_0.6fr] gap-6 flex-1">
-
-        {/* ─── Espace d'entretien ─── */}
         <section className="bg-white rounded-[28px] border border-[#ebe6db] shadow-[0_10px_30px_rgba(0,0,0,0.04)] p-6 sm:p-8 md:p-10 flex flex-col">
-
-          {/* Label haut */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2 text-[10px] tracking-[0.2em] text-[#8a8f7d]">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-                <path d="M3 12h3l3-8 4 16 3-8h5"/>
-              </svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M3 12h3l3-8 4 16 3-8h5"/></svg>
               ESPACE D'ENTRETIEN
             </div>
-            {/* Timer */}
             {isConnected && (
-              <div className={`font-mono text-[13px] font-semibold px-3 py-1 rounded-lg ${
-                timeWarning ? "bg-amber-50 text-amber-600 border border-amber-200" : "bg-[#f3f2ee] text-[#5f6452]"
-              }`}>
+              <div className={`font-mono text-[13px] font-semibold px-3 py-1 rounded-lg ${timeWarning ? "bg-amber-50 text-amber-600 border border-amber-200" : "bg-[#f3f2ee] text-[#5f6452]"}`}>
                 {formatTime(seconds)} / 20:00
               </div>
             )}
           </div>
 
-          {/* Zone centrale */}
           <div className="flex flex-col items-center text-center flex-1">
-
-            {/* ── Bulle micro animée ── */}
             <div className="relative">
               <div className={`h-[124px] w-[124px] rounded-full flex items-center justify-center transition-all duration-500 ${
-                isConnected
-                  ? isSpeaking
-                    ? "bg-[#6b735c] shadow-[0_0_0_16px_rgba(107,115,92,0.10),0_0_0_32px_rgba(107,115,92,0.04)]"
-                    : isListening
-                    ? "bg-[#748068] shadow-[0_0_0_10px_rgba(116,128,104,0.12)]"
-                    : "bg-[#5f6452] shadow-[0_4px_20px_rgba(95,100,82,0.20)]"
-                  : isConnecting
-                  ? "bg-[#8a8f7d]"
-                  : "bg-[#a8ad9d]"
+                isConnected ? isSpeaking ? "bg-[#6b735c] shadow-[0_0_0_16px_rgba(107,115,92,0.10),0_0_0_32px_rgba(107,115,92,0.04)]" : isListening ? "bg-[#748068] shadow-[0_0_0_10px_rgba(116,128,104,0.12)]" : "bg-[#5f6452] shadow-[0_4px_20px_rgba(95,100,82,0.20)]" : isConnecting ? "bg-[#8a8f7d]" : "bg-[#a8ad9d]"
               }`}>
                 {isSpeaking && <div className="absolute inset-0 rounded-full animate-ping bg-[#6b735c]/12"/>}
-
                 {isConnecting ? (
                   <svg className="animate-spin text-white" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                     <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
@@ -697,14 +475,12 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
                 ) : isConnected && isListening ? (
                   <svg width="46" height="46" viewBox="0 0 24 24" fill="none" className="text-white">
                     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" fill="currentColor"/>
-                    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"
-                      stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 ) : isSpeaking ? (
                   <div className="flex items-end gap-[5px] h-9">
                     {[0.55, 1, 0.75, 1.15, 0.65].map((h, i) => (
-                      <div key={i} className="w-[5px] bg-white rounded-full"
-                        style={{ height: `${h * 100}%`, animation: `soundwave 0.7s ease-in-out ${i * 0.11}s infinite alternate` }}/>
+                      <div key={i} className="w-[5px] bg-white rounded-full" style={{ height: `${h * 100}%`, animation: `soundwave 0.7s ease-in-out ${i * 0.11}s infinite alternate` }}/>
                     ))}
                   </div>
                 ) : (
@@ -716,42 +492,26 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
               </div>
             </div>
 
-            {/* Badge mode (mobile) */}
             {modeLabel && (
               <div className={`sm:hidden mt-5 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold ${modeBadgeColor}`}>
-                <span className={`h-1.5 w-1.5 rounded-full ${mode === "apprentissage" ? "bg-blue-500" : "bg-amber-500"}`}/>
-                {modeLabel}
+                <span className={`h-1.5 w-1.5 rounded-full ${mode === "apprentissage" ? "bg-blue-500" : "bg-amber-500"}`}/>{modeLabel}
               </div>
             )}
 
-            {/* Titre dynamique */}
-            <h1 className="mt-8 font-serif text-[26px] sm:text-[32px] md:text-[36px] leading-tight italic text-[#2f332a]">
-              {statusLabel}
-            </h1>
+            <h1 className="mt-8 font-serif text-[26px] sm:text-[32px] md:text-[36px] leading-tight italic text-[#2f332a]">{statusLabel}</h1>
 
-            {/* Sous-titre */}
             <p className="mt-3 max-w-[500px] text-[14px] sm:text-[15px] leading-relaxed text-[#6f7566]">
-              {isConnected
-                ? mode
-                  ? "Parlez naturellement en français. Vous pouvez interrompre le jury à tout moment."
-                  : "Dites MODE APPRENTISSAGE ou MODE SIMULATION pour commencer."
-                : "Cliquez sur le bouton ci-dessous pour démarrer la simulation. Assurez-vous d'être dans un environnement calme et d'avoir autorisé l'accès à votre microphone."}
+              {isConnected ? mode ? "Parlez naturellement en français. Vous pouvez interrompre le jury à tout moment." : "Dites MODE APPRENTISSAGE ou MODE SIMULATION pour commencer." : "Cliquez sur le bouton ci-dessous pour démarrer la simulation. Assurez-vous d'être dans un environnement calme et d'avoir autorisé l'accès à votre microphone."}
             </p>
 
-            {/* Message d'erreur */}
             {errorMsg && (
               <div className="mt-5 max-w-md w-full bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-[13px] text-red-700 text-left leading-relaxed">
-                <span className="font-semibold block mb-1">⚠ Erreur de connexion</span>
-                {errorMsg}
+                <span className="font-semibold block mb-1">⚠ Erreur de connexion</span>{errorMsg}
               </div>
             )}
 
-            {/* Boutons */}
             {!isConnected && !isConnecting && (
-              <button
-                onClick={startInterview}
-                className="mt-8 inline-flex items-center gap-2.5 rounded-xl bg-[#5f6452] px-7 py-3.5 text-[15px] font-medium text-white shadow-[0_8px_20px_rgba(95,100,82,0.25)] hover:bg-[#545a48] active:scale-[0.98] transition-all duration-150"
-              >
+              <button onClick={startInterview} className="mt-8 inline-flex items-center gap-2.5 rounded-xl bg-[#5f6452] px-7 py-3.5 text-[15px] font-medium text-white shadow-[0_8px_20px_rgba(95,100,82,0.25)] hover:bg-[#545a48] active:scale-[0.98] transition-all duration-150">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" strokeLinecap="round"/>
@@ -762,22 +522,11 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
 
             {isConnected && (
               <div className="mt-7 flex items-center gap-3 flex-wrap justify-center">
-                <button
-                  onClick={interruptJury}
-                  className="rounded-xl border border-[#ddd8cc] bg-white px-5 py-2.5 text-[13px] font-medium text-[#4a4e42] hover:bg-[#f9f7f3] transition-all shadow-sm"
-                >
-                  Interrompre
-                </button>
-                <button
-                  onClick={stopInterview}
-                  className="rounded-xl bg-[#a44a3f] px-5 py-2.5 text-[13px] font-medium text-white hover:bg-[#8f3f35] transition-all shadow-sm"
-                >
-                  Terminer l'entretien
-                </button>
+                <button onClick={interruptJury} className="rounded-xl border border-[#ddd8cc] bg-white px-5 py-2.5 text-[13px] font-medium text-[#4a4e42] hover:bg-[#f9f7f3] transition-all shadow-sm">Interrompre</button>
+                <button onClick={stopInterview} className="rounded-xl bg-[#a44a3f] px-5 py-2.5 text-[13px] font-medium text-white hover:bg-[#8f3f35] transition-all shadow-sm">Terminer l'entretien</button>
               </div>
             )}
 
-            {/* Progression questions */}
             {isConnected && mode && questionNum > 0 && (
               <div className="mt-7 w-full max-w-xs">
                 <div className="flex justify-between text-[11px] text-[#8a8f7d] mb-1.5">
@@ -785,42 +534,30 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
                   <span className="font-medium text-[#5f6452]">{questionNum} / 10</span>
                 </div>
                 <div className="h-1.5 w-full bg-[#ede9e0] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#5f6452] rounded-full transition-all duration-700"
-                    style={{ width: `${(questionNum / 10) * 100}%` }}
-                  />
+                  <div className="h-full bg-[#5f6452] rounded-full transition-all duration-700" style={{ width: `${(questionNum / 10) * 100}%` }}/>
                 </div>
               </div>
             )}
           </div>
 
-          {/* ── Transcription live ── */}
           {isConnected && messages.length > 0 && (
             <div className="mt-10 border-t border-[#f0ebe1] pt-7">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[10px] font-semibold tracking-[0.14em] text-[#6b6f5f] uppercase">
-                  Transcription en direct
-                </h3>
-                <span className="text-[11px] text-[#9a9f8d]">
-                  {messages.length} échange{messages.length > 1 ? "s" : ""}
-                </span>
+                <h3 className="text-[10px] font-semibold tracking-[0.14em] text-[#6b6f5f] uppercase">Transcription en direct</h3>
+                <span className="text-[11px] text-[#9a9f8d]">{messages.length} échange{messages.length > 1 ? "s" : ""}</span>
               </div>
               <div className="max-h-[280px] overflow-y-auto space-y-3.5 pr-1">
                 {messages.slice(-12).map((m) => (
                   <div key={m.id} className="flex gap-3">
-                    <div className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-semibold ${
-                      m.role === "assistant"
-                        ? "bg-[#5f6452] text-white"
-                        : "bg-[#e8e4d9] text-[#5a5e50]"
-                    }`}>
+                    <div className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0 text-[11px] font-semibold ${m.role === "assistant" ? "bg-[#5f6452] text-white" : "bg-[#e8e4d9] text-[#5a5e50]"}`}>
                       {m.role === "assistant" ? "J" : "V"}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[11px] font-medium text-[#8a8f7d] mb-0.5">
-                        {m.role === "assistant" ? "Jury IA" : "Vous"}
-                      </div>
+                      <div className="text-[11px] font-medium text-[#8a8f7d] mb-0.5">{m.role === "assistant" ? "Jury IA" : "Vous"}</div>
                       <div className="text-[13px] sm:text-[14px] leading-relaxed text-[#3a3e34] break-words">
-                        {m.text}
+                        {m.text.split("\n").map((line, i) =>
+                          line.trim() === "" ? <br key={i}/> : <span key={i} className="block">{line}</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -831,51 +568,25 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
           )}
         </section>
 
-        {/* ─── Sidebar droite ─── */}
         <div className="space-y-5">
-
-          {/* Déroulement */}
           <section className="bg-white rounded-[28px] border border-[#ebe6db] shadow-[0_10px_30px_rgba(0,0,0,0.04)] p-6 sm:p-7">
-            <h3 className="text-[10px] tracking-[0.2em] text-[#8a8f7d] font-semibold mb-5 uppercase">
-              Déroulement de l'entretien
-            </h3>
+            <h3 className="text-[10px] tracking-[0.2em] text-[#8a8f7d] font-semibold mb-5 uppercase">Déroulement de l'entretien</h3>
             <div className="space-y-4">
               {[
-                { n: 1, label: "Choix du mode",   desc: "Apprentissage ou Simulation." },
-                { n: 2, label: "Présentation",     desc: "Identité et parcours professionnel." },
-                { n: 3, label: "10 questions",     desc: "5 domaines DEAS · 11 compétences." },
-                { n: 4, label: "Synthèse finale",  desc: "Verdict et conseils personnalisés." },
+                { n: 1, label: "Choix du mode",  desc: "Apprentissage ou Simulation." },
+                { n: 2, label: "Présentation",    desc: "Identité et parcours professionnel." },
+                { n: 3, label: "10 questions",    desc: "5 domaines DEAS · 11 compétences." },
+                { n: 4, label: "Synthèse finale", desc: "Verdict et conseils personnalisés." },
               ].map((step) => {
-                // Phase active basée sur l'état réel
-                const stepActive =
-                  step.n === 1 ? (isConnected && !mode) :
-                  step.n === 2 ? (isConnected && !!mode && questionNum === 0) :
-                  step.n === 3 ? (isConnected && !!mode && questionNum > 0 && questionNum < 10) :
-                  step.n === 4 ? (isConnected && questionNum >= 10) : false;
-                const stepDone =
-                  step.n === 1 ? (isConnected && !!mode) :
-                  step.n === 2 ? (isConnected && questionNum > 0) :
-                  step.n === 3 ? (isConnected && questionNum >= 10) : false;
-
+                const stepActive = step.n === 1 ? (isConnected && !mode) : step.n === 2 ? (isConnected && !!mode && questionNum === 0) : step.n === 3 ? (isConnected && !!mode && questionNum > 0 && questionNum < 10) : step.n === 4 ? (isConnected && questionNum >= 10) : false;
+                const stepDone   = step.n === 1 ? (isConnected && !!mode) : step.n === 2 ? (isConnected && questionNum > 0) : step.n === 3 ? (isConnected && questionNum >= 10) : false;
                 return (
                   <div key={step.n} className="flex items-start gap-3">
-                    <div className={`h-7 w-7 rounded-full flex items-center justify-center text-[12px] font-semibold border-2 transition-all duration-500 flex-shrink-0 mt-0.5 ${
-                      stepDone
-                        ? "bg-[#5f6452] border-[#5f6452] text-white"
-                        : stepActive
-                        ? "bg-[#5f6452] border-[#5f6452] text-white ring-4 ring-[#5f6452]/15"
-                        : "bg-white border-[#ddd8cc] text-[#9a9f8d]"
-                    }`}>
-                      {stepDone ? (
-                        <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                          <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      ) : step.n}
+                    <div className={`h-7 w-7 rounded-full flex items-center justify-center text-[12px] font-semibold border-2 transition-all duration-500 flex-shrink-0 mt-0.5 ${stepDone ? "bg-[#5f6452] border-[#5f6452] text-white" : stepActive ? "bg-[#5f6452] border-[#5f6452] text-white ring-4 ring-[#5f6452]/15" : "bg-white border-[#ddd8cc] text-[#9a9f8d]"}`}>
+                      {stepDone ? (<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>) : step.n}
                     </div>
                     <div>
-                      <div className={`text-[14px] font-medium transition-colors ${stepActive || stepDone ? "text-[#2b2e27]" : "text-[#7a7f6f]"}`}>
-                        {step.label}
-                      </div>
+                      <div className={`text-[14px] font-medium transition-colors ${stepActive || stepDone ? "text-[#2b2e27]" : "text-[#7a7f6f]"}`}>{step.label}</div>
                       <div className="text-[11px] text-[#9a9f8d] mt-0.5">{step.desc}</div>
                     </div>
                   </div>
@@ -884,11 +595,8 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
             </div>
           </section>
 
-          {/* 5 Domaines DEAS */}
           <section className="bg-white rounded-[24px] border border-[#ebe6db] shadow-[0_4px_16px_rgba(0,0,0,0.03)] p-5 sm:p-6">
-            <h3 className="text-[10px] tracking-[0.2em] text-[#8a8f7d] font-semibold mb-4 uppercase">
-              Référentiel DEAS — 5 domaines
-            </h3>
+            <h3 className="text-[10px] tracking-[0.2em] text-[#8a8f7d] font-semibold mb-4 uppercase">Référentiel DEAS — 5 domaines</h3>
             <div className="space-y-2">
               {[
                 { code: "DA1", label: "Vie quotidienne & sociale" },
@@ -898,9 +606,7 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
                 { code: "DA5", label: "Transmissions & continuité" },
               ].map((da) => (
                 <div key={da.code} className="flex items-center gap-2.5">
-                  <span className="text-[10px] font-mono font-bold text-[#5f6452] bg-[#f3f2ee] px-2 py-0.5 rounded flex-shrink-0">
-                    {da.code}
-                  </span>
+                  <span className="text-[10px] font-mono font-bold text-[#5f6452] bg-[#f3f2ee] px-2 py-0.5 rounded flex-shrink-0">{da.code}</span>
                   <span className="text-[12px] text-[#5e6457]">{da.label}</span>
                 </div>
               ))}
@@ -910,145 +616,89 @@ if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/ses
             </div>
           </section>
 
-          {/* Deux modes */}
           <section className="bg-white rounded-[24px] border border-[#ebe6db] shadow-[0_4px_16px_rgba(0,0,0,0.03)] p-5 sm:p-6">
-            <h3 className="text-[10px] tracking-[0.2em] text-[#8a8f7d] font-semibold mb-4 uppercase">
-              Les deux modes
-            </h3>
+            <h3 className="text-[10px] tracking-[0.2em] text-[#8a8f7d] font-semibold mb-4 uppercase">Les deux modes</h3>
             <div className="space-y-3">
               <div className={`rounded-xl border p-3 transition-all ${mode === "apprentissage" ? "border-blue-200 bg-blue-50" : "border-[#ebe6db] bg-[#fafaf7]"}`}>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="h-2 w-2 rounded-full bg-blue-400 flex-shrink-0"/>
                   <span className="text-[12px] font-semibold text-[#2b2e27]">Mode Apprentissage</span>
                 </div>
-                <p className="text-[11px] text-[#6b6f5f] leading-snug pl-4">
-                  Aide après chaque réponse. Corrections au fil des questions. Idéal pour progresser.
-                </p>
+                <p className="text-[11px] text-[#6b6f5f] leading-snug pl-4">Aide après chaque réponse. Corrections au fil des questions. Idéal pour progresser.</p>
               </div>
               <div className={`rounded-xl border p-3 transition-all ${mode === "simulation" ? "border-amber-200 bg-amber-50" : "border-[#ebe6db] bg-[#fafaf7]"}`}>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="h-2 w-2 rounded-full bg-amber-400 flex-shrink-0"/>
                   <span className="text-[12px] font-semibold text-[#2b2e27]">Mode Simulation</span>
                 </div>
-                <p className="text-[11px] text-[#6b6f5f] leading-snug pl-4">
-                  Jury impartial. Pas de correction en cours. Synthèse uniquement à la fin. Comme le vrai jury.
-                </p>
+                <p className="text-[11px] text-[#6b6f5f] leading-snug pl-4">Jury impartial. Pas de correction en cours. Synthèse uniquement à la fin. Comme le vrai jury.</p>
               </div>
             </div>
           </section>
 
-          {/* Confidentialité */}
           <section className="rounded-[20px] border-l-4 border-[#b8bcae] bg-[#f9f8f5] px-5 py-4">
-            <h4 className="text-[10px] tracking-[0.2em] text-[#6b6f5f] font-semibold mb-2 uppercase">
-              Confidentialité
-            </h4>
-            <p className="text-[12px] leading-snug text-[#5a5e50] italic">
-              Les échanges sont traités en temps réel par l'IA et ne sont pas stockés à l'issue de votre session.
-            </p>
+            <h4 className="text-[10px] tracking-[0.2em] text-[#6b6f5f] font-semibold mb-2 uppercase">Confidentialité</h4>
+            <p className="text-[12px] leading-snug text-[#5a5e50] italic">Les échanges sont traités en temps réel par l'IA et ne sont pas stockés à l'issue de votre session.</p>
           </section>
         </div>
       </main>
 
-      {/* ═══════════════════════════════════════
-          CARTES BASSES
-      ═══════════════════════════════════════ */}
       <div className="mx-auto max-w-[1280px] w-full px-4 sm:px-6 pb-10 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <section className="bg-white/70 backdrop-blur rounded-[22px] border border-[#ebe6db] p-5 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b6f5f" strokeWidth="1.8">
               <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-              <rect x="9" y="3" width="6" height="4" rx="1"/>
-              <path d="M9 12h6M9 16h4"/>
+              <rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/>
             </svg>
             <h4 className="text-[11px] font-semibold tracking-wide text-[#5a5e50] uppercase">Sujets évalués</h4>
           </div>
           <ul className="space-y-1.5 text-[12px] text-[#5e6457]">
-            {[
-              "Actes essentiels & vie quotidienne",
-              "Soins, hygiène & prévention des risques",
-              "Communication & accompagnement famille",
-              "Transmissions & travail en équipe",
-              "Entretien des locaux & matériels",
-            ].map((s) => (
-              <li key={s} className="flex gap-2">
-                <span className="text-[#b0b5a5] flex-shrink-0">•</span>{s}
-              </li>
+            {["Actes essentiels & vie quotidienne","Soins, hygiène & prévention des risques","Communication & accompagnement famille","Transmissions & travail en équipe","Entretien des locaux & matériels"].map((s) => (
+              <li key={s} className="flex gap-2"><span className="text-[#b0b5a5] flex-shrink-0">•</span>{s}</li>
             ))}
           </ul>
         </section>
-
         <section className="bg-white/70 backdrop-blur rounded-[22px] border border-[#ebe6db] p-5 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b6f5f" strokeWidth="1.8">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 16v-4M12 8h.01"/>
+              <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
             </svg>
             <h4 className="text-[11px] font-semibold tracking-wide text-[#5a5e50] uppercase">Conseils de préparation</h4>
           </div>
           <ul className="space-y-1.5 text-[12px] text-[#5e6457]">
-            {[
-              "Préparez des exemples concrets et datés",
-              "Maîtrisez le vocabulaire technique (asepsie, VAD, escarre…)",
-              "Décrivez vos gestes étape par étape",
-              "Citez votre structure d'exercice précisément",
-              "Ne vous pressez pas — le jury attend",
-            ].map((s) => (
-              <li key={s} className="flex gap-2">
-                <span className="text-[#b0b5a5] flex-shrink-0">•</span>{s}
-              </li>
+            {["Préparez des exemples concrets et datés","Maîtrisez le vocabulaire technique (asepsie, VAD, escarre…)","Décrivez vos gestes étape par étape","Citez votre structure d'exercice précisément","Ne vous pressez pas — le jury attend"].map((s) => (
+              <li key={s} className="flex gap-2"><span className="text-[#b0b5a5] flex-shrink-0">•</span>{s}</li>
             ))}
           </ul>
         </section>
       </div>
 
-      {/* ═══════════════════════════════════════
-          BANDEAU D'INACTIVITÉ (bas d'écran)
-      ═══════════════════════════════════════ */}
       {isConnected && showInactivity && (
         <div className="fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 sm:pb-6 pointer-events-none">
           <div className="mx-auto max-w-[760px] pointer-events-auto">
             <div className="relative overflow-hidden rounded-2xl border border-amber-300 bg-amber-50 shadow-[0_-8px_30px_rgba(180,120,40,0.18)] backdrop-blur">
-              {/* Barre de progression du compte à rebours */}
-              <div className="absolute top-0 left-0 h-[3px] bg-amber-400 transition-all duration-1000 ease-linear"
-                   style={{ width: `${(countdown / COUNTDOWN_DURATION) * 100}%` }}/>
-
+              <div className="absolute top-0 left-0 h-[3px] bg-amber-400 transition-all duration-1000 ease-linear" style={{ width: `${(countdown / COUNTDOWN_DURATION) * 100}%` }}/>
               <div className="flex items-center gap-4 p-4 sm:p-5">
-                {/* Icône horloge clignotante */}
                 <div className="flex-shrink-0 h-11 w-11 rounded-full bg-amber-100 flex items-center justify-center animate-pulse">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4 2" strokeLinecap="round"/>
+                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" strokeLinecap="round"/>
                   </svg>
                 </div>
-
-                {/* Texte */}
                 <div className="flex-1 min-w-0">
-                  <div className="text-[14px] sm:text-[15px] font-semibold text-amber-900 leading-tight">
-                    Inactivité détectée
-                  </div>
+                  <div className="text-[14px] sm:text-[15px] font-semibold text-amber-900 leading-tight">Inactivité détectée</div>
                   <div className="text-[12px] sm:text-[13px] text-amber-800 mt-0.5">
                     Déconnexion automatique dans{" "}
-                    <span className="font-mono font-bold text-amber-900 tabular-nums">
-                      {countdown}s
-                    </span>
+                    <span className="font-mono font-bold text-amber-900 tabular-nums">{countdown}s</span>
                     {" "}si aucune activité.
                   </div>
                 </div>
-
-                {/* Bouton Continuer */}
-                <button
-                  onClick={continueSession}
-                  className="flex-shrink-0 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-[13px] font-semibold px-4 sm:px-5 py-2.5 shadow-sm transition-all active:scale-95"
-                >
-                  Continuer
-                </button>
+                <button onClick={continueSession} className="flex-shrink-0 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-[13px] font-semibold px-4 sm:px-5 py-2.5 shadow-sm transition-all active:scale-95">Continuer</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Animation barres son */}
       <style>{`
         @keyframes soundwave {
           from { transform: scaleY(0.3); }
