@@ -68,9 +68,9 @@ app.get("/api/session", async (_req, res) => {
   session: {
     type: "realtime",
     model: "gpt-4o-realtime-preview",
-    voice: "shimmer",
     instructions: "Tu es un jury de VAE aide-soignant. Tu parles exclusivement en français.",
   },
+    voice: "shimmer",
 }),
       }
     );
