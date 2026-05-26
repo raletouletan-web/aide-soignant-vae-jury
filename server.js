@@ -64,12 +64,13 @@ app.get("/api/session", async (_req, res) => {
           Authorization: `Bearer ${OPENAI_API_KEY}`,
           "Content-Type": "application/json",
         },
-      body: JSON.stringify({
-  session: {
-    type: "realtime",
-    model: "gpt-realtime",
-    voice: "shimmer",
+   body: JSON.stringify({
+          session: {
+            model: "gpt-4o-realtime-preview",
+            voice: "shimmer",
     instructions: "Tu es un jury de VAE aide-soignant. Tu parles exclusivement en français.",
+            
+            modalities: ["audio", "text"]
   },
 }),
       }
