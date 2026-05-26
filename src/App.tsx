@@ -461,7 +461,7 @@ export default function App() {
         );
       }
       const sessionData  = await sessionRes.json();
-      const ephemeralKey = sessionData.client_secret?.value;
+      const ephemeralKey = sessionData.value;
 if (!ephemeralKey) throw new Error("Token éphémère absent. Vérifiez /api/session.");
 
       // 2. Micro
