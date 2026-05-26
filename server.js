@@ -99,7 +99,6 @@ app.get("/api/session", async (_req, res) => {
         session: {
           type: "realtime",
           model: "gpt-realtime",
-          voice: "shimmer",
           instructions: INSTRUCTIONS,
         },
       }),
