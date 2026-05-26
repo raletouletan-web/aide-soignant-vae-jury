@@ -70,7 +70,6 @@ app.get("/api/session", async (_req, res) => {
     model: "gpt-4o-realtime-preview",
     instructions: "Tu es un jury de VAE aide-soignant. Tu parles exclusivement en français.",
   },
-    voice: "shimmer",
 }),
       }
     );
