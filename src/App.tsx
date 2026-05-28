@@ -72,7 +72,6 @@ Gestion du silence ou de l'hésitation : Si le candidat ne répond pas, hésite 
 SI LE CANDIDAT DIT «TEST JURY», c'est que je teste l'application, va directement à la synthèse finale où tu improviseras des axes d'amélioration. C'est pour me permettre de controler le bon fonctionnement de l'outil.
 
 
-
 La première question après le choix du mode est toujours : "Pouvez-vous vous présenter brièvement ?"
 Tu utiliseras le prénom du candidat pour personnaliser tes questions lorsque c'est nécessaire.
 
@@ -315,6 +314,14 @@ export default function App() {
           session: {
             type: "realtime",
             instructions: INSTRUCTIONS,
+            turn_detection: {
+              type: "server_vad",
+              threshold: 0.5,
+              prefix_padding_ms: 300,
+              silence_duration_ms: 600,
+              create_response: true,
+              interrupt_response: true,
+            },
           },
         });
         // Déclencher l'ouverture du jury après l'envoi des instructions
@@ -331,17 +338,36 @@ export default function App() {
         upsertMessage(id, "assistant", transcriptRef.current[id]);
         // ✅ Couper le micro dès que la synthèse commence
         if (!micMutedRef.current && synthesisDetectedRef.current === false) {
-          const t = (transcriptRef.current[id] || "").toLowerCase();
+          const txt = (transcriptRef.current[id] || "").toLowerCase();
           if (
-            t.includes("profil favorable") ||
-            t.includes("profil à compléter") ||
-            t.includes("préparation à poursuivre") ||
-            t.includes("impression générale")
+            txt.includes("profil favorable") ||
+            txt.includes("profil à compléter") ||
+            txt.includes("préparation à poursuivre") ||
+            txt.includes("impression générale")
           ) {
             micMutedRef.current = true;
-            // Désactiver toutes les pistes audio du micro
+            // 1. Désactiver physiquement les pistes micro
             if (micStreamRef.current) {
-              micStreamRef.current.getTracks().forEach((t) => { t.enabled = false; });
+              micStreamRef.current.getTracks().forEach((track) => { track.enabled = false; });
+            }
+            // 2. Désactiver l'interruption vocale côté OpenAI
+            if (dcRef.current?.readyState === "open") {
+              dcRef.current.send(JSON.stringify({
+                type: "session.update",
+                session: {
+                  type: "realtime",
+                  turn_detection: {
+                    type: "server_vad",
+                    threshold: 0.5,
+                    prefix_padding_ms: 300,
+                    silence_duration_ms: 600,
+                    create_response: false,
+                    interrupt_response: false,
+                  },
+                },
+              }));
+              // 3. Vider le buffer audio entrant
+              dcRef.current.send(JSON.stringify({ type: "input_audio_buffer.clear" }));
             }
           }
         }
@@ -398,6 +424,8 @@ export default function App() {
       }
 
       case "input_audio_buffer.speech_started":
+        // ✅ Ignorer les interruptions pendant la synthèse
+        if (micMutedRef.current) break;
         setIsListening(true);
         audioQueueRef.current = []; isPlayingRef.current = false; setIsSpeaking(false);
         break;
