@@ -277,24 +277,20 @@ export default function App() {
 
       case "session.created":
         // ✅ Envoyer les instructions PUIS déclencher l'ouverture
-       sendEvent({
-  type: "session.update",
-  session: {
-    type: "realtime",
-    instructions: INSTRUCTIONS,
-    input_audio_transcription: {
-      model: "whisper-1",
-      language: "fr",
-    },
-    turn_detection: {
-      type: "server_vad",
-      threshold: 0.5,
-      prefix_padding_ms: 300,
-      silence_duration_ms: 600,
-      create_response: true,
-    },
-  },
-});
+        sendEvent({
+          type: "session.update",
+          session: {
+            type: "realtime",
+            instructions: INSTRUCTIONS,
+            turn_detection: {
+              type: "server_vad",
+              threshold: 0.5,
+              prefix_padding_ms: 300,
+              silence_duration_ms: 600,
+              create_response: true,
+            },
+          },
+        });
         // Déclencher l'ouverture du jury après l'envoi des instructions
         sendEvent({ type: "response.create" });
         break;
