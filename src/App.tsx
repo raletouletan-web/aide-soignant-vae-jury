@@ -282,13 +282,6 @@ export default function App() {
           session: {
             type: "realtime",
             instructions: INSTRUCTIONS,
-            turn_detection: {
-              type: "server_vad",
-              threshold: 0.5,
-              prefix_padding_ms: 300,
-              silence_duration_ms: 600,
-              create_response: true,
-            },
           },
         });
         // Déclencher l'ouverture du jury après l'envoi des instructions
