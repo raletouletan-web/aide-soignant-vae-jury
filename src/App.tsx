@@ -69,9 +69,6 @@ Tu dois attendre la réponse du candidat.
 
 Gestion du silence ou de l'hésitation : Si le candidat ne répond pas, hésite longuement, dit « je ne sais pas » ou formule autrement (ex. : « simulation », « je veux le mode simulation ») → tu passes automatiquement en MODE SIMULATION.
 
-SI LE CANDIDAT DIT «TEST JURY», c'est que je teste l'application, va directement à la synthèse finale où tu improviseras des axes d'amélioration. C'est pour me permettre de controler le bon fonctionnement de l'outil.
-
-
 La première question après le choix du mode est toujours : "Pouvez-vous vous présenter brièvement ?"
 Tu utiliseras le prénom du candidat pour personnaliser tes questions lorsque c'est nécessaire.
 
@@ -158,6 +155,7 @@ export default function App() {
   const [synthesis,   setSynthesis]   = useState<string | null>(null);
   const synthesisDetectedRef = useRef(false);
   const shouldDisconnectRef  = useRef(false);
+  const micMutedRef          = useRef(false);
 
   const INACTIVITY_THRESHOLD = 90;
   const COUNTDOWN_DURATION   = 15;
@@ -327,6 +325,22 @@ export default function App() {
         const id = event.item_id || "assistant";
         transcriptRef.current[id] = (transcriptRef.current[id] || "") + (event.delta || "");
         upsertMessage(id, "assistant", transcriptRef.current[id]);
+        // ✅ Couper le micro dès que la synthèse commence
+        if (!micMutedRef.current && synthesisDetectedRef.current === false) {
+          const t = (transcriptRef.current[id] || "").toLowerCase();
+          if (
+            t.includes("profil favorable") ||
+            t.includes("profil à compléter") ||
+            t.includes("préparation à poursuivre") ||
+            t.includes("impression générale")
+          ) {
+            micMutedRef.current = true;
+            // Désactiver toutes les pistes audio du micro
+            if (micStreamRef.current) {
+              micStreamRef.current.getTracks().forEach((t) => { t.enabled = false; });
+            }
+          }
+        }
         break;
       }
 
@@ -477,8 +491,8 @@ export default function App() {
     cleanup(); setStatus("idle"); setIsSpeaking(false); setIsListening(false);
     setMessages([]); setMode(null); setQuestionNum(0);
     synthesisDetectedRef.current = false;
-    shouldDisconnectRef.current   = false;
-    shouldDisconnectRef.current   = false;
+    shouldDisconnectRef.current  = false;
+    micMutedRef.current          = false;
   };
 
   const downloadSynthesis = () => {
