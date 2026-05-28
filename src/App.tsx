@@ -125,8 +125,9 @@ Structure de la synthèse (maximum 500 mots) :
 CONTRAINTES : Ne pas lister tous les domaines un par un. Pas de tableaux. Maximum 500 mots. Terminer par une phrase d'encouragement personnalisée avec le prénom du candidat.
 
 7. FIN DE L'ENTRETIEN
-Après la synthèse, tu conclus formellement et tu termines l'entretien.
-Tu restes formel jusqu'au dernier mot.`;
+Après la synthèse, tu conclus formellement.
+Tes DERNIERS MOTS, obligatoires, sont toujours exactement : "Bonne continuation dans votre préparation."
+Tu ne dis rien après cette phrase. C'est le signal de fin de session.`;
 
 function pcm16Base64ToAudioBuffer(base64: string, ctx: AudioContext): AudioBuffer | null {
   try {
@@ -333,13 +334,11 @@ export default function App() {
           upsertMessage(id, "assistant", event.transcript);
           // ✅ Détection de la synthèse finale
           const t = event.transcript.toLowerCase();
-          if (!synthesisDetectedRef.current && (
-            t.includes("profil favorable") ||
-            t.includes("profil à compléter") ||
-            t.includes("préparation à poursuivre")
-          )) {
+          if (!synthesisDetectedRef.current &&
+            t.includes("bonne continuation dans votre préparation")
+          ) {
             synthesisDetectedRef.current = true;
-            shouldDisconnectRef.current   = true;
+            shouldDisconnectRef.current  = true;
             setSynthesis(event.transcript);
           }
         }
