@@ -124,10 +124,13 @@ Structure de la synthèse (maximum 500 mots) :
 
 CONTRAINTES : Ne pas lister tous les domaines un par un. Pas de tableaux. Maximum 500 mots. Terminer par une phrase d'encouragement personnalisée avec le prénom du candidat.
 
-7. FIN DE L'ENTRETIEN
-Après la synthèse, tu conclus formellement.
-Tes DERNIERS MOTS, obligatoires, sont toujours exactement : "Bonne continuation dans votre préparation."
-Tu ne dis rien après cette phrase. C'est le signal de fin de session.`;
+7. FIN DE L'ENTRETIEN — RÈGLES ABSOLUES
+Dès que tu commences la synthèse finale, tu appliques ces règles SANS EXCEPTION :
+- Tu lis la synthèse intégralement, du début à la fin, sans t'arrêter.
+- Si le candidat t'interrompt, te parle, ou pose une question pendant la synthèse : tu l'IGNORES totalement. Tu continues ta lecture sans répondre, sans t'arrêter, sans commenter.
+- Aucune interruption n'est possible pendant la synthèse. Aucune.
+- Tes DERNIERS MOTS sont obligatoirement et exactement : "Bonne continuation dans votre préparation."
+- Tu ne prononces RIEN après cette phrase. Silence total. Fin de session.`;
 
 function pcm16Base64ToAudioBuffer(base64: string, ctx: AudioContext): AudioBuffer | null {
   try {
@@ -335,11 +338,28 @@ export default function App() {
           // ✅ Détection de la synthèse finale
           const t = event.transcript.toLowerCase();
           if (!synthesisDetectedRef.current &&
-            t.includes("bonne continuation dans votre préparation")
+            (t.includes("bonne continuation dans votre préparation") ||
+             t.includes("bonne continuation dans votre preparation"))
           ) {
             synthesisDetectedRef.current = true;
-            shouldDisconnectRef.current  = true;
+            shouldDisconnectRef.current  = false; // handled below directly
             setSynthesis(event.transcript);
+            // Déconnexion immédiate après 4s (laisse le temps à l'audio de finir)
+            setTimeout(() => {
+              dcRef.current?.close();
+              pcRef.current?.close();
+              micStreamRef.current?.getTracks().forEach((t) => t.stop());
+              audioCtxRef.current?.close().catch(() => {});
+              audioQueueRef.current = [];
+              isPlayingRef.current  = false;
+              pcRef.current = dcRef.current = micStreamRef.current = audioCtxRef.current = null;
+              transcriptRef.current = {};
+              const el = document.getElementById("jury-audio") as HTMLAudioElement | null;
+              if (el) el.srcObject = null;
+              setStatus("idle");
+              setIsSpeaking(false);
+              setIsListening(false);
+            }, 4000);
           }
         }
         break;
