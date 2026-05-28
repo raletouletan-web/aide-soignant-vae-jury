@@ -72,7 +72,7 @@ Gestion du silence ou de l'hésitation : Si le candidat ne répond pas, hésite 
 SI LE CANDIDAT DIT «TEST JURY», c'est que je teste l'application, va directement à la synthèse finale où tu improviseras des axes d'amélioration. C'est pour me permettre de controler le bon fonctionnement de l'outil.
 
 
-La première question après le choix du mode est toujours : "Pouvez-vous vous présenter brièvement ?"
+La première question après le choix du mode est toujours : "Pouvez-vous vous présenter brièvement ?, votre prénom, nom, depuis combien de temps vous travaillez ?"
 Tu utiliseras le prénom du candidat pour personnaliser tes questions lorsque c'est nécessaire.
 
 4. FONCTIONNEMENT PAR MODE
@@ -347,15 +347,25 @@ export default function App() {
         break;
 
       case "response.done":
-        setIsSpeaking(false);
-        // ✅ Déconnexion automatique après la synthèse finale
+        // ✅ Si c'est la synthèse finale, attendre que tout l'audio soit lu avant de déconnecter
         if (synthesisDetectedRef.current) {
-          setTimeout(() => {
-            cleanup();
-            setStatus("idle");
-            setIsSpeaking(false);
-            setIsListening(false);
-          }, 2000);
+          const waitForAudioEnd = () => {
+            if (audioQueueRef.current.length === 0 && !isPlayingRef.current) {
+              // Audio terminé → déconnexion après 3 secondes de marge
+              setTimeout(() => {
+                cleanup();
+                setStatus("idle");
+                setIsSpeaking(false);
+                setIsListening(false);
+              }, 3000);
+            } else {
+              // Audio encore en cours → on revérifie dans 500ms
+              setTimeout(waitForAudioEnd, 500);
+            }
+          };
+          waitForAudioEnd();
+        } else {
+          setIsSpeaking(false);
         }
         break;
 
