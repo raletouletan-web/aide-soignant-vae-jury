@@ -68,9 +68,7 @@ Veuillez choisir votre mode. Dites : MODE APPRENTISSAGE ou MODE SIMULATION. »
 Tu dois attendre la réponse du candidat.
 
 Gestion du silence ou de l'hésitation : Si le candidat ne répond pas, hésite longuement, dit « je ne sais pas » ou formule autrement (ex. : « simulation », « je veux le mode simulation ») → tu passes automatiquement en MODE SIMULATION.
-SI LE CANDIDAT DIT «TEST JURY», c'est que je teste l'application, va directement à la synthèse finale où tu improviseras des axes d'amélioration. C'est pour me permettre de controler le bon fonctionnement de l'outil.
-
-
+SI LE CANDIDAT DIT « TEST JURY », va directement à la synthèse finale en improvisant des axes d'amélioration. C'est un test de l'outil.
 
 La première question après le choix du mode est toujours : "Pouvez-vous vous présenter brièvement ?"
 Tu utiliseras le prénom du candidat pour personnaliser tes questions lorsque c'est nécessaire.
@@ -81,56 +79,45 @@ MODE APPRENTISSAGE
 Structure : 10 questions couvrant les 5 domaines. Les questions devront être variées et pas dans un ordre défini. Durée max : 20 minutes.
 À chaque réponse :
 - Réponse complète et précise → validation brève + question suivante.
-- Réponse insuffisante, floue ou incomplète → tu expliques poliment ce qui manque. Tu poses une seule question d'aide (ex. : « Pouvez-vous décrire la procédure étape par étape ? »). Quelle que soit la réponse à cette aide → tu passes à la question suivante.
-- Réponse hors sujet ou incohérente → « Votre réponse ne correspond pas totalement à la question posée. » + tu reformules la question une fois.
+- Réponse insuffisante, floue ou incomplète → tu expliques poliment ce qui manque. Tu poses une seule question d'aide. Quelle que soit la réponse → tu passes à la question suivante.
+- Réponse hors sujet ou incohérente → tu reformules la question une fois.
 Règle clé : tu accompagnes sans donner la solution. Maximum 2 aides par question.
 
 MODE SIMULATION
 Structure : 10 questions couvrant les 5 domaines. Durée max : 15 minutes.
 À chaque réponse :
 - Tu ne valides pas. Tu ne corriges pas. Tu ne donnes aucune aide.
-- Tu peux rebondir pour creuser (ex. : « Décrivez précisément les gestes réalisés, étape par étape. »).
-- Réponse hors sujet ou incohérente → « Votre réponse ne correspond pas à la question posée. » Tu précises la question.
+- Tu peux rebondir pour creuser.
 Tu notes en continu pour la synthèse finale.
 
-RÈGLES COMMUNES AUX DEUX MODES :
-- Si le candidat souhaite changer de mode en cours d'entretien → ce n'est pas possible, tu le lui indiques poliment.
-- Si le candidat souhaite arrêter ou stopper la session → tu conclus formellement et tu termines.
-- Si le candidat reste sans réponse longuement → tu précises que tu vas stopper la session, puis tu termines.
+RÈGLES COMMUNES :
+- Changement de mode en cours : impossible.
+- Si le candidat veut arrêter : tu conclus et termines.
+- Si le candidat reste sans réponse longuement : tu stoppes la session.
 
 5. ANALYSE EN CONTINU (les deux modes)
-Durant tout l'entretien, tu évalues silencieusement :
-- Vocabulaire : présence des termes techniques (asepsie, escarre, paramètres vitaux, contention, etc.)
-- Profondeur : procédures expliquées étape par étape, raisonnement clinique présent.
-- Pertinence des exemples : situations réelles, datées, contextualisées, spécifiques au soin.
-- Véracité des gestes : respect des règles d'hygiène, sécurité patient, bonnes postures de mobilisation.
+Tu évalues silencieusement : vocabulaire technique, profondeur des réponses, pertinence des exemples, véracité des gestes.
 En mode apprentissage : tu corriges les erreurs graves au fil de l'entretien.
-En mode simulation : tu conserves les erreurs graves pour la synthèse finale uniquement.
+En mode simulation : tu conserves les erreurs pour la synthèse finale uniquement.
 
-6. SYNTHÈSE FINALE (les deux modes) — Pas de minuterie pour cette partie
-Tu produis la synthèse suivante à l'oral, de façon structurée. Le ton est professionnel mais bienveillant, orienté progression et non sanction.
-
+6. SYNTHÈSE FINALE — RÈGLES ABSOLUES
 Structure de la synthèse (maximum 500 mots) :
-1. Impression générale : 2-3 phrases sur la posture du candidat (aisance, clarté, engagement). Commencer par un point positif.
-2. Ce que le jury a perçu comme solide : 2-4 compétences ou comportements bien démontrés, avec un exemple tiré de l'entretien si possible.
-3. Ce qui mérite d'être renforcé avant le vrai jury : 2-3 points concrets, formulés comme des conseils ("Pensez à...", "Il serait utile de...") plutôt que comme des constats d'échec.
-4. Point de vigilance : uniquement si un écart significatif est détecté sur une compétence clé du référentiel. Sinon, ne pas mentionner cette section.
-5. Conseil de préparation : 1 action prioritaire concrète à travailler avant le jury réel (procédure à revoir, exemple à préparer, vocabulaire à maîtriser).
-6. Verdict simulé : l'une des trois options :
+1. Impression générale : 2-3 phrases. Commencer par un point positif.
+2. Ce que le jury a perçu comme solide : 2-4 compétences bien démontrées.
+3. Ce qui mérite d'être renforcé : 2-3 conseils concrets.
+4. Point de vigilance : uniquement si écart significatif détecté.
+5. Conseil de préparation : 1 action prioritaire concrète.
+6. Verdict simulé : exactement l'une de ces trois phrases :
    - "Profil favorable à la validation"
    - "Profil à compléter — quelques ajustements suffisent"
    - "Préparation à poursuivre — des écarts importants subsistent"
-   Accompagner d'une phrase d'explication courte.
 
-CONTRAINTES : Ne pas lister tous les domaines un par un. Pas de tableaux. Maximum 500 mots. Terminer par une phrase d'encouragement personnalisée avec le prénom du candidat.
-
-7. FIN DE L'ENTRETIEN — RÈGLES ABSOLUES
-Dès que tu commences la synthèse finale, tu appliques ces règles SANS EXCEPTION :
-- Tu lis la synthèse intégralement, du début à la fin, sans t'arrêter.
-- Si le candidat t'interrompt, te parle, ou pose une question pendant la synthèse : tu l'IGNORES totalement. Tu continues ta lecture sans répondre, sans t'arrêter, sans commenter.
-- Aucune interruption n'est possible pendant la synthèse. Aucune.
-- Tes DERNIERS MOTS sont obligatoirement et exactement : "Bonne continuation dans votre préparation."
-- Tu ne prononces RIEN après cette phrase. Silence total. Fin de session.`;
+RÈGLES ABSOLUES PENDANT LA SYNTHÈSE :
+- Tu lis la synthèse intégralement du début à la fin SANS T'ARRÊTER.
+- Si le candidat parle, t'interrompt ou pose une question : tu l'IGNORES TOTALEMENT.
+- Tu continues sans répondre, sans t'arrêter, sans commenter l'interruption.
+- Tes DERNIERS MOTS sont obligatoirement : "Bonne continuation dans votre préparation."
+- Tu ne prononces RIEN après cette phrase.`;
 
 function pcm16Base64ToAudioBuffer(base64: string, ctx: AudioContext): AudioBuffer | null {
   try {
@@ -156,9 +143,9 @@ export default function App() {
   const [mode,        setMode]        = useState<InterviewMode>(null);
   const [questionNum, setQuestionNum] = useState(0);
   const [synthesis,   setSynthesis]   = useState<string | null>(null);
-  const synthesisDetectedRef = useRef(false);
-  const shouldDisconnectRef  = useRef(false);
-  const micMutedRef          = useRef(false);
+
+  const synthesisStartedRef  = useRef(false); // micro coupé dès début synthèse
+  const synthesisFinishedRef = useRef(false); // déconnexion après phrase finale
 
   const INACTIVITY_THRESHOLD = 90;
   const COUNTDOWN_DURATION   = 15;
@@ -247,32 +234,31 @@ export default function App() {
   const progressPct = Math.min((seconds / 1200) * 100, 100);
   const timeWarning = seconds >= 1080;
 
+  // ── Déconnexion propre ──
+  const disconnectSession = useCallback(() => {
+    dcRef.current?.close();
+    pcRef.current?.close();
+    micStreamRef.current?.getTracks().forEach((t) => t.stop());
+    audioCtxRef.current?.close().catch(() => {});
+    audioQueueRef.current = [];
+    isPlayingRef.current  = false;
+    pcRef.current = dcRef.current = micStreamRef.current = audioCtxRef.current = null;
+    transcriptRef.current = {};
+    const el = document.getElementById("jury-audio") as HTMLAudioElement | null;
+    if (el) el.srcObject = null;
+    setStatus("idle");
+    setIsSpeaking(false);
+    setIsListening(false);
+  }, []);
+
   const playNextChunk = useCallback(() => {
     if (!audioCtxRef.current || audioQueueRef.current.length === 0) {
       isPlayingRef.current = false;
       setIsSpeaking(false);
-      // ✅ File audio vide + déconnexion demandée → on déconnecte
-      if (shouldDisconnectRef.current) {
-        shouldDisconnectRef.current = false;
-        setTimeout(() => {
-          dcRef.current?.close();
-          pcRef.current?.close();
-          micStreamRef.current?.getTracks().forEach((t) => t.stop());
-          audioCtxRef.current?.close().catch(() => {});
-          audioQueueRef.current = [];
-          isPlayingRef.current  = false;
-          pcRef.current = dcRef.current = micStreamRef.current = audioCtxRef.current = null;
-          transcriptRef.current = {};
-          const el = document.getElementById("jury-audio") as HTMLAudioElement | null;
-          if (el) el.srcObject = null;
-          setStatus("idle");
-          setIsSpeaking(false);
-          setIsListening(false);
-        }, 3000);
-      }
       return;
     }
-    isPlayingRef.current = true; setIsSpeaking(true);
+    isPlayingRef.current = true;
+    setIsSpeaking(true);
     const buf    = audioQueueRef.current.shift()!;
     const source = audioCtxRef.current.createBufferSource();
     source.buffer = buf;
@@ -308,23 +294,14 @@ export default function App() {
     switch (event.type) {
 
       case "session.created":
-        // ✅ Envoyer les instructions PUIS déclencher l'ouverture
+        // ✅ Instructions uniquement — pas de turn_detection (refusé par l'API)
         sendEvent({
           type: "session.update",
           session: {
             type: "realtime",
             instructions: INSTRUCTIONS,
-            turn_detection: {
-              type: "server_vad",
-              threshold: 0.5,
-              prefix_padding_ms: 300,
-              silence_duration_ms: 600,
-              create_response: true,
-              interrupt_response: true,
-            },
           },
         });
-        // Déclencher l'ouverture du jury après l'envoi des instructions
         sendEvent({ type: "response.create" });
         break;
 
@@ -333,42 +310,45 @@ export default function App() {
         break;
 
       case "response.output_audio_transcript.delta": {
-        const id = event.item_id || "assistant";
-        transcriptRef.current[id] = (transcriptRef.current[id] || "") + (event.delta || "");
-        upsertMessage(id, "assistant", transcriptRef.current[id]);
-        // ✅ Couper le micro dès que la synthèse commence
-        if (!micMutedRef.current && synthesisDetectedRef.current === false) {
-          const txt = (transcriptRef.current[id] || "").toLowerCase();
+        const id  = event.item_id || "assistant";
+        const txt = (transcriptRef.current[id] || "") + (event.delta || "");
+        transcriptRef.current[id] = txt;
+        upsertMessage(id, "assistant", txt);
+
+        // ✅ Couper le micro dès que la synthèse commence (détection début)
+        if (!synthesisStartedRef.current) {
+          const low = txt.toLowerCase();
           if (
-            txt.includes("profil favorable") ||
-            txt.includes("profil à compléter") ||
-            txt.includes("préparation à poursuivre") ||
-            txt.includes("impression générale")
+            low.includes("impression générale") ||
+            low.includes("profil favorable") ||
+            low.includes("profil à compléter") ||
+            low.includes("préparation à poursuivre")
           ) {
-            micMutedRef.current = true;
-            // 1. Désactiver physiquement les pistes micro
+            synthesisStartedRef.current = true;
+            // Couper physiquement le micro
             if (micStreamRef.current) {
-              micStreamRef.current.getTracks().forEach((track) => { track.enabled = false; });
+              micStreamRef.current.getTracks().forEach((track) => {
+                track.enabled = false;
+              });
             }
-            // 2. Désactiver l'interruption vocale côté OpenAI
+            // Vider le buffer audio entrant côté OpenAI
             if (dcRef.current?.readyState === "open") {
-              dcRef.current.send(JSON.stringify({
-                type: "session.update",
-                session: {
-                  type: "realtime",
-                  turn_detection: {
-                    type: "server_vad",
-                    threshold: 0.5,
-                    prefix_padding_ms: 300,
-                    silence_duration_ms: 600,
-                    create_response: false,
-                    interrupt_response: false,
-                  },
-                },
-              }));
-              // 3. Vider le buffer audio entrant
               dcRef.current.send(JSON.stringify({ type: "input_audio_buffer.clear" }));
             }
+          }
+        }
+
+        // ✅ Déclencher déconnexion quand phrase finale détectée
+        if (!synthesisFinishedRef.current) {
+          const low = txt.toLowerCase();
+          if (
+            low.includes("bonne continuation dans votre préparation") ||
+            low.includes("bonne continuation dans votre preparation")
+          ) {
+            synthesisFinishedRef.current = true;
+            setSynthesis(txt);
+            // Attendre 5s pour laisser l'audio finir puis déconnecter
+            setTimeout(disconnectSession, 5000);
           }
         }
         break;
@@ -379,31 +359,9 @@ export default function App() {
         if (event.transcript) {
           transcriptRef.current[id] = event.transcript;
           upsertMessage(id, "assistant", event.transcript);
-          // ✅ Détection de la synthèse finale
-          const t = event.transcript.toLowerCase();
-          if (!synthesisDetectedRef.current &&
-            (t.includes("bonne continuation dans votre préparation") ||
-             t.includes("bonne continuation dans votre preparation"))
-          ) {
-            synthesisDetectedRef.current = true;
-            shouldDisconnectRef.current  = false; // handled below directly
+          // Mise à jour de la synthèse si déjà détectée
+          if (synthesisFinishedRef.current) {
             setSynthesis(event.transcript);
-            // Déconnexion immédiate après 4s (laisse le temps à l'audio de finir)
-            setTimeout(() => {
-              dcRef.current?.close();
-              pcRef.current?.close();
-              micStreamRef.current?.getTracks().forEach((t) => t.stop());
-              audioCtxRef.current?.close().catch(() => {});
-              audioQueueRef.current = [];
-              isPlayingRef.current  = false;
-              pcRef.current = dcRef.current = micStreamRef.current = audioCtxRef.current = null;
-              transcriptRef.current = {};
-              const el = document.getElementById("jury-audio") as HTMLAudioElement | null;
-              if (el) el.srcObject = null;
-              setStatus("idle");
-              setIsSpeaking(false);
-              setIsListening(false);
-            }, 4000);
           }
         }
         break;
@@ -424,13 +382,14 @@ export default function App() {
       }
 
       case "input_audio_buffer.speech_started":
-        // ✅ Ignorer les interruptions pendant la synthèse
-        if (micMutedRef.current) break;
+        // ✅ Ignorer toute entrée vocale pendant la synthèse
+        if (synthesisStartedRef.current) break;
         setIsListening(true);
         audioQueueRef.current = []; isPlayingRef.current = false; setIsSpeaking(false);
         break;
 
       case "input_audio_buffer.speech_stopped":
+        if (synthesisStartedRef.current) break;
         setIsListening(false);
         break;
 
@@ -445,7 +404,7 @@ export default function App() {
 
       default: break;
     }
-  }, [sendEvent, enqueueAudio, upsertMessage]);
+  }, [sendEvent, enqueueAudio, upsertMessage, disconnectSession]);
 
   const startInterview = async () => {
     setErrorMsg(null);
@@ -484,7 +443,7 @@ export default function App() {
 
       pc.onconnectionstatechange = () => {
         if (pc.connectionState === "failed" || pc.connectionState === "closed") {
-          cleanup(); setStatus("idle");
+          disconnectSession();
         }
       };
 
@@ -499,12 +458,11 @@ export default function App() {
       if (!sdpRes.ok) throw new Error(`Erreur SDP ${sdpRes.status}: ${await sdpRes.text()}`);
       await pc.setRemoteDescription({ type: "answer", sdp: await sdpRes.text() });
 
-      console.log("✅ WebRTC GA connecté — gpt-realtime");
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err?.message || "Impossible de se connecter.");
       setStatus("error");
-      cleanup();
+      disconnectSession();
     }
   };
 
@@ -520,11 +478,11 @@ export default function App() {
   };
 
   const stopInterview = () => {
-    cleanup(); setStatus("idle"); setIsSpeaking(false); setIsListening(false);
+    cleanup();
+    setStatus("idle"); setIsSpeaking(false); setIsListening(false);
     setMessages([]); setMode(null); setQuestionNum(0);
-    synthesisDetectedRef.current = false;
-    shouldDisconnectRef.current  = false;
-    micMutedRef.current          = false;
+    synthesisStartedRef.current  = false;
+    synthesisFinishedRef.current = false;
   };
 
   const downloadSynthesis = () => {
@@ -545,13 +503,12 @@ export default function App() {
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");
-    a.href     = url;
-    a.download = `synthese-VAE-${date}.txt`;
-    a.click();
+    a.href = url; a.download = `synthese-VAE-${date}.txt`; a.click();
     URL.revokeObjectURL(url);
   };
 
   const interruptJury = () => {
+    if (synthesisStartedRef.current) return; // bloquer pendant synthèse
     audioQueueRef.current = []; isPlayingRef.current = false; setIsSpeaking(false);
     sendEvent({ type: "response.cancel" });
   };
