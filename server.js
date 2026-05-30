@@ -173,10 +173,9 @@ app.get("/api/session", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          type: "realtime",
           session: {
             type: "realtime",
-                        instructions: `LANGUE : Tu DOIS parler UNIQUEMENT en français. Toutes tes réponses, questions et commentaires sont exclusivement en français. Ne parle jamais en anglais ni dans aucune autre langue.
+            instructions: `LANGUE : Tu DOIS parler UNIQUEMENT en français. Toutes tes réponses, questions et commentaires sont exclusivement en français. Ne parle jamais en anglais ni dans aucune autre langue.
 
 Tu fonctionnes en temps réel (speech-to-speech). Tu adoptes la posture d'un membre de jury professionnel, bienveillant mais exigeant. Phrases courtes. Une seule question à la fois.
 
