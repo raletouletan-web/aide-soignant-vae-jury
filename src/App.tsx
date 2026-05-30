@@ -144,8 +144,11 @@ export default function App() {
   const [questionNum, setQuestionNum] = useState(0);
   const [synthesis,   setSynthesis]   = useState<string | null>(null);
 
-  const synthesisStartedRef  = useRef(false); // micro coupé dès début synthèse
-  const synthesisFinishedRef = useRef(false); // déconnexion après phrase finale
+  const synthesisStartedRef  = useRef(false);
+  const synthesisFinishedRef = useRef(false);
+
+  // ── NOUVEAU : verrou anti-interruption pendant que l'IA parle ──
+  const isAISpeakingRef = useRef(false);
 
   const INACTIVITY_THRESHOLD = 90;
   const COUNTDOWN_DURATION   = 15;
@@ -234,7 +237,6 @@ export default function App() {
   const progressPct = Math.min((seconds / 1200) * 100, 100);
   const timeWarning = seconds >= 1080;
 
-  // ── Déconnexion propre ──
   const disconnectSession = useCallback(() => {
     dcRef.current?.close();
     pcRef.current?.close();
@@ -242,6 +244,7 @@ export default function App() {
     audioCtxRef.current?.close().catch(() => {});
     audioQueueRef.current = [];
     isPlayingRef.current  = false;
+    isAISpeakingRef.current = false;
     pcRef.current = dcRef.current = micStreamRef.current = audioCtxRef.current = null;
     transcriptRef.current = {};
     const el = document.getElementById("jury-audio") as HTMLAudioElement | null;
@@ -253,11 +256,13 @@ export default function App() {
 
   const playNextChunk = useCallback(() => {
     if (!audioCtxRef.current || audioQueueRef.current.length === 0) {
-      isPlayingRef.current = false;
+      isPlayingRef.current    = false;
+      isAISpeakingRef.current = false; // ── L'IA a fini de parler → micro réactivé
       setIsSpeaking(false);
       return;
     }
-    isPlayingRef.current = true;
+    isPlayingRef.current    = true;
+    isAISpeakingRef.current = true;  // ── L'IA commence à parler → verrou ON
     setIsSpeaking(true);
     const buf    = audioQueueRef.current.shift()!;
     const source = audioCtxRef.current.createBufferSource();
@@ -294,7 +299,6 @@ export default function App() {
     switch (event.type) {
 
       case "session.created":
-        // ✅ Instructions uniquement — pas de turn_detection (refusé par l'API)
         sendEvent({
           type: "session.update",
           session: {
@@ -305,7 +309,14 @@ export default function App() {
         sendEvent({ type: "response.create" });
         break;
 
+      case "response.audio.delta":
+        // ── Dès le 1er chunk audio → verrou ON immédiatement ──
+        isAISpeakingRef.current = true;
+        enqueueAudio(event.delta);
+        break;
+
       case "response.output_audio.delta":
+        isAISpeakingRef.current = true;
         enqueueAudio(event.delta);
         break;
 
@@ -315,7 +326,6 @@ export default function App() {
         transcriptRef.current[id] = txt;
         upsertMessage(id, "assistant", txt);
 
-        // ✅ Couper le micro dès que la synthèse commence (détection début)
         if (!synthesisStartedRef.current) {
           const low = txt.toLowerCase();
           if (
@@ -325,20 +335,17 @@ export default function App() {
             low.includes("préparation à poursuivre")
           ) {
             synthesisStartedRef.current = true;
-            // Couper physiquement le micro
             if (micStreamRef.current) {
               micStreamRef.current.getTracks().forEach((track) => {
                 track.enabled = false;
               });
             }
-            // Vider le buffer audio entrant côté OpenAI
             if (dcRef.current?.readyState === "open") {
               dcRef.current.send(JSON.stringify({ type: "input_audio_buffer.clear" }));
             }
           }
         }
 
-        // ✅ Déclencher déconnexion quand phrase finale détectée
         if (!synthesisFinishedRef.current) {
           const low = txt.toLowerCase();
           if (
@@ -347,7 +354,6 @@ export default function App() {
           ) {
             synthesisFinishedRef.current = true;
             setSynthesis(txt);
-            // Attendre 5s pour laisser l'audio finir puis déconnecter
             setTimeout(disconnectSession, 5000);
           }
         }
@@ -359,7 +365,6 @@ export default function App() {
         if (event.transcript) {
           transcriptRef.current[id] = event.transcript;
           upsertMessage(id, "assistant", event.transcript);
-          // Mise à jour de la synthèse si déjà détectée
           if (synthesisFinishedRef.current) {
             setSynthesis(event.transcript);
           }
@@ -382,8 +387,12 @@ export default function App() {
       }
 
       case "input_audio_buffer.speech_started":
-        // ✅ Ignorer toute entrée vocale pendant la synthèse
-        if (synthesisStartedRef.current) break;
+        // ── BLOQUÉ si l'IA parle ou si synthèse en cours ──
+        if (isAISpeakingRef.current || synthesisStartedRef.current) {
+          // Vider immédiatement le buffer pour annuler la détection
+          sendEvent({ type: "input_audio_buffer.clear" });
+          break;
+        }
         setIsListening(true);
         audioQueueRef.current = []; isPlayingRef.current = false; setIsSpeaking(false);
         break;
@@ -394,6 +403,9 @@ export default function App() {
         break;
 
       case "response.done":
+        // ── L'IA a terminé sa réponse → on libère le verrou ──
+        // On attend que la queue audio soit vide avant de libérer
+        // playNextChunk gère déjà isAISpeakingRef quand la queue est vide
         setIsSpeaking(false);
         break;
 
@@ -471,6 +483,7 @@ export default function App() {
     micStreamRef.current?.getTracks().forEach((t) => t.stop());
     audioCtxRef.current?.close().catch(() => {});
     audioQueueRef.current = []; isPlayingRef.current = false;
+    isAISpeakingRef.current = false;
     pcRef.current = dcRef.current = micStreamRef.current = audioCtxRef.current = null;
     transcriptRef.current = {};
     const el = document.getElementById("jury-audio") as HTMLAudioElement | null;
@@ -508,8 +521,10 @@ export default function App() {
   };
 
   const interruptJury = () => {
-    if (synthesisStartedRef.current) return; // bloquer pendant synthèse
-    audioQueueRef.current = []; isPlayingRef.current = false; setIsSpeaking(false);
+    if (synthesisStartedRef.current) return;
+    audioQueueRef.current = []; isPlayingRef.current = false;
+    isAISpeakingRef.current = false; // ── Libérer le verrou sur interruption manuelle
+    setIsSpeaking(false);
     sendEvent({ type: "response.cancel" });
   };
 
@@ -683,7 +698,6 @@ export default function App() {
             </div>
           )}
 
-          {/* ✅ Synthèse finale — affichée après déconnexion */}
           {!isConnected && synthesis && (
             <div className="mt-8 border-t border-[#f0ebe1] pt-7">
               <div className="flex items-center gap-2 mb-5">
