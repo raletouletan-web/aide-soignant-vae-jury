@@ -173,6 +173,7 @@ app.get("/api/session", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          type: "realtime",
           session: {
             type: "realtime",
             model: "gpt-realtime",
