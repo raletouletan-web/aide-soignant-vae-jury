@@ -12,6 +12,12 @@ type InterviewMode = null | "apprentissage" | "simulation";
 const WEBRTC_URL = "https://api.openai.com/v1/realtime/calls";
 const MODEL      = "gpt-realtime";
 
+// ── Token lu depuis l'URL — vérification réelle faite côté server.js ──
+function getTokenFromURL(): string | null {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("token");
+}
+
 const INSTRUCTIONS = `LANGUE : Tu DOIS parler UNIQUEMENT en français. Toutes tes réponses, questions et commentaires sont exclusivement en français. Ne parle jamais en anglais ni dans aucune autre langue.
 
 Tu fonctionnes en temps réel (speech-to-speech). Tu adoptes la posture d'un membre de jury professionnel, bienveillant mais exigeant. Phrases courtes. Une seule question à la fois.
@@ -132,7 +138,6 @@ function pcm16Base64ToAudioBuffer(base64: string, ctx: AudioContext): AudioBuffe
     return buf;
   } catch { return null; }
 }
-
 export default function App() {
   const [status,      setStatus]      = useState<ConnectionStatus>("idle");
   const [isSpeaking,  setIsSpeaking]  = useState(false);
@@ -302,8 +307,10 @@ export default function App() {
         sendEvent({
           type: "session.update",
           session: {
-            type: "realtime",
             instructions: INSTRUCTIONS,
+            // ── VAD désactivée : l'IA ne peut pas être interrompue par un bruit ──
+            turn_detection: null,
+            input_audio_transcription: { model: "whisper-1" },
           },
         });
         sendEvent({ type: "response.create" });
@@ -423,7 +430,7 @@ export default function App() {
     try {
       setStatus("connecting");
 
-      const sessionRes = await fetch("/api/session");
+      const sessionRes = await fetch(`/api/session?token=${encodeURIComponent(token ?? "")}`);
       if (!sessionRes.ok) {
         const body = await sessionRes.json().catch(() => ({}));
         throw new Error(body.error || body.detail || `Erreur serveur ${sessionRes.status}`);
@@ -528,9 +535,13 @@ export default function App() {
     sendEvent({ type: "response.cancel" });
   };
 
+  // ── Token récupéré depuis l'URL (vérification faite par server.js) ──
+  const token = getTokenFromURL();
+
   const modeLabel = mode === "apprentissage" ? "Mode Apprentissage" : mode === "simulation" ? "Mode Simulation" : null;
   const modeBadgeColor = mode === "apprentissage" ? "bg-blue-50 border-blue-200 text-blue-700" : mode === "simulation" ? "bg-amber-50 border-amber-200 text-amber-700" : "";
   const statusLabel = isConnecting ? "Connexion en cours…" : isConnected ? isSpeaking ? "Le jury s'exprime…" : isListening ? "À vous la parole" : mode ? "En attente de votre réponse" : "Choisissez votre mode" : "Prêt pour votre oral ?";
+
 
   return (
     <div className="min-h-screen bg-[#f7f5f1] text-[#2b2e27] flex flex-col">
