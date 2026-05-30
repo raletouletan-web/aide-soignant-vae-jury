@@ -176,7 +176,8 @@ app.get("/api/session", async (req, res) => {
           session: {
             type: "realtime",
             model: "gpt-realtime",
-            instructions: "Tu es un jury de VAE aide-soignant. Tu parles exclusivement en français.",
+            // Instructions volontairement vides ici.
+            // Elles sont envoyées par App.tsx via session.update après connexion.
           },
         }),
       }
